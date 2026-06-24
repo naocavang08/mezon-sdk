@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Mezon_sdk</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <PackageId>Mezon.Sdk</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>MinhNC</Authors>
+    <Company>NCCPLUS</Company>
+    <Description>.NET SDK for Mezon bot/client integration.</Description>
+    <PackageTags>mezon;sdk;bot;dotnet</PackageTags>
+    <RepositoryUrl>https://github.com/naocavang08/mezon-sdk</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/naocavang08/mezon-sdk</PackageProjectUrl>
+
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.34.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.78.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
+
+    <Protobuf Include="Protobuf/Api/api.proto" GrpcServices="Client" ProtoRoot="Protobuf" />
+    <Protobuf Include="Protobuf/RtApi/realtime.proto" GrpcServices="Client" ProtoRoot="Protobuf" />
+  </ItemGroup>
+
+</Project>
