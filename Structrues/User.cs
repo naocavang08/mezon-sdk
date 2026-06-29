@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Mezon_sdk.Constants;
 using Mezon_sdk.Managers;
 using Mezon_sdk.Models;
@@ -14,9 +15,13 @@ namespace Mezon_sdk.Structures
         public string? ClanNick { get; set; }
         public string? ClanAvatar { get; set; }
         public string? DisplayName { get; set; }
-
+        [JsonIgnore]
         public ChannelManager ChannelManager { get; set; }
+        
+        [JsonIgnore]
         public SocketManager SocketManager { get; set; }
+        
+        public User() { }
         
         private static readonly Logger Logger = new Logger("User");
 
@@ -36,6 +41,12 @@ namespace Mezon_sdk.Structures
 
             SocketManager = socketManager ?? throw new ArgumentNullException(nameof(socketManager));
             ChannelManager = channelManager ?? throw new ArgumentNullException(nameof(channelManager));
+        }
+
+        internal void Attach(SocketManager socketManager, ChannelManager channelManager)
+        {
+            SocketManager = socketManager;
+            ChannelManager = channelManager;
         }
 
         public async Task<ApiChannelDescription> CreateDmChannelAsync()

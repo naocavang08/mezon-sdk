@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Mezon.Net.Internal.Api;
 using Mezon_sdk.Constants;
 using Mezon_sdk.Managers;
@@ -14,17 +15,27 @@ namespace Mezon_sdk.Structures
         public long WelcomeChannelId { get; set; }
         
         // Client property typed as dynamic as MezonClient is not defined yet
+        [JsonIgnore]
         public dynamic? Client { get; set; } 
         public int ClientId { get; set; }
 
+        [JsonIgnore]
         public MezonApi ApiClient { get; set; }
+        
+        [JsonIgnore]
         public SocketManager SocketManager { get; set; }
+        
         public string SessionToken { get; set; }
+        
+        [JsonIgnore]
         public MessageDbService Service { get; set; }
 
         private bool _channelsLoaded = false;
 
+        [JsonIgnore]
         public CacheManager<long, TextChannel> Channels { get; set; }
+
+        public Clan() { }
 
         private static readonly Logger Logger = new Logger("Clan");
 
@@ -54,6 +65,18 @@ namespace Mezon_sdk.Structures
             Service = service;
 
             Channels = new CacheManager<long, TextChannel>(ChannelFetcherAsync);
+        }
+
+        internal void Attach(dynamic client, MezonApi apiClient, SocketManager socketManager, MessageDbService service)
+        {
+            Client = client;
+            ApiClient = apiClient;
+            SocketManager = socketManager;
+            Service = service;
+            if (Channels == null)
+            {
+                Channels = new CacheManager<long, TextChannel>(ChannelFetcherAsync);
+            }
         }
 
         private async Task<TextChannel> ChannelFetcherAsync(long channelId)

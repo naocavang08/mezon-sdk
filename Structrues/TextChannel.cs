@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Mezon_sdk.Models;
 using Mezon_sdk.Managers;
 using Mezon_sdk.Messages;
@@ -16,16 +17,27 @@ namespace Mezon_sdk.Structures
         public string CategoryName { get; set; }
         public long ParentId { get; set; }
         public string MeetingCode { get; set; }
+        public long ClanId { get; set; }
+        [JsonIgnore]
         public Clan Clan { get; set; }
 
+        [JsonIgnore]
         public CacheManager<long, Message> Messages { get; set; }
+        
+        [JsonIgnore]
         public SocketManager SocketManager { get; set; }
+        
+        [JsonIgnore]
         public MessageDbService Service { get; set; }
+
+        public TextChannel() { }
 
         public TextChannel(ApiChannelDescription initChannelData, Clan clan, SocketManager socketManager, MessageDbService service)
         {
             if (long.TryParse(initChannelData.ChannelId?.ToString(), out var id)) Id = id;
             Name = initChannelData.ChannelLabel?.ToString();
+            
+            ClanId = clan?.Id ?? 0;
             
             if (int.TryParse(initChannelData.Type?.ToString(), out var type)) ChannelType = type;
 
@@ -43,6 +55,17 @@ namespace Mezon_sdk.Structures
             Service = service ?? throw new ArgumentNullException(nameof(service));
 
             Messages = new CacheManager<long, Message>(MessageFetcherAsync, 200);
+        }
+
+        internal void Attach(Clan clan, SocketManager socketManager, MessageDbService service)
+        {
+            Clan = clan;
+            SocketManager = socketManager;
+            Service = service;
+            if (Messages == null)
+            {
+                Messages = new CacheManager<long, Message>(MessageFetcherAsync, 200);
+            }
         }
 
         private async Task<Message> MessageFetcherAsync(long messageId)

@@ -9,6 +9,10 @@ using Mezon_sdk.Messages;
 using Mezon_sdk.Models;
 using Mezon_sdk.Structures;
 using Mezon_sdk.Utils;
+using Mezon_sdk.RedisStore;
+using StackExchange.Redis;
+using SocketManager = Mezon_sdk.Managers.SocketManager;
+using ChannelMessage = Mezon_sdk.Models.ChannelMessage;
 
 using Rt = Mezon.Net.Internal.Realtime;
 using ApiUtils = Mezon_sdk.Api.Utils;
@@ -88,6 +92,7 @@ namespace Mezon_sdk
             int timeoutMs = DefaultTimeoutMs,
             string mmnApiUrl = DefaultMmnApi,
             string zkApiUrl = DefaultZkApi,
+            string? redisConnectionString = null,
             ILogger<MezonClient>? logger = null)
         {
             ClientId = clientId;
@@ -104,9 +109,20 @@ namespace Mezon_sdk
 
             EventManager = new EventManager();
             MessageDb = new MessageDbService();
-            Clans = new CacheManager<long, Clan>(GetClanFromIdAsync, maxSize: 1000);
-            Channels = new CacheManager<long, TextChannel>(GetChannelFromIdAsync, maxSize: 1000);
-            Users = new CacheManager<long, User>(GetUserFromIdAsync, maxSize: 1000);
+
+            if (!string.IsNullOrEmpty(redisConnectionString))
+            {
+                var muxer = ConnectionMultiplexer.Connect(redisConnectionString);
+                Clans = new CacheManager<long, Clan>(GetClanFromIdAsync, maxSize: 1000, new RedisCacheStore<long, Clan>(muxer, "Clan"), clan => clan.Attach(this, ApiClient!, SocketManager!, MessageDb));
+                Channels = new CacheManager<long, TextChannel>(GetChannelFromIdAsync, maxSize: 1000, new RedisCacheStore<long, TextChannel>(muxer, "Channel"), ch => ch.Attach(Clans.Get(ch.ClanId)!, SocketManager!, MessageDb));
+                Users = new CacheManager<long, User>(GetUserFromIdAsync, maxSize: 1000, new RedisCacheStore<long, User>(muxer, "User"), user => user.Attach(SocketManager!, ChannelManager!));
+            }
+            else
+            {
+                Clans = new CacheManager<long, Clan>(GetClanFromIdAsync, maxSize: 1000);
+                Channels = new CacheManager<long, TextChannel>(GetChannelFromIdAsync, maxSize: 1000);
+                Users = new CacheManager<long, User>(GetUserFromIdAsync, maxSize: 1000);
+            }
 
             RegisterInternalEventBindings();
             _logger?.LogInformation("MezonClient initialized for client_id: {ClientId}", clientId);

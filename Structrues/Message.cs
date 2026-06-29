@@ -3,6 +3,7 @@ namespace Mezon_sdk.Structures
     using System;
     using System.Collections.Generic;
     using System.Text.Json;
+    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using Mezon_sdk.Models;
     using Mezon_sdk.Managers;
@@ -20,8 +21,13 @@ namespace Mezon_sdk.Structures
         public int? TopicId { get; set; }
         public int? CreateTimeSeconds { get; set; }
 
+        [JsonIgnore]
         public TextChannel Channel { get; set; }
+        
+        [JsonIgnore]
         public SocketManager SocketManager { get; set; }
+
+        public Message() { }
 
         public Message(ChannelMessage messageRaw, TextChannel channel, SocketManager socketManager)
         {
@@ -38,6 +44,12 @@ namespace Mezon_sdk.Structures
 
             Channel = channel ?? throw new ArgumentNullException(nameof(channel));
             SocketManager = socketManager ?? throw new ArgumentNullException(nameof(socketManager));
+        }
+
+        internal void Attach(TextChannel channel, SocketManager socketManager)
+        {
+            Channel = channel;
+            SocketManager = socketManager;
         }
 
         public async Task<ChannelMessageAck> ReplyAsync(

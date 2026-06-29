@@ -12,12 +12,12 @@
 - **Robust Real-time Connections**: Integrated WebSocket adapter with automatic reconnection (Auto Reconnect) using exponential backoff.
 - **Comprehensive Interactions**: Fully supports message operations (Send, Reply, Update, React, Delete, Ephemeral).
 - **Interactive Messages & Forms**: Provides `InteractiveBuilder` and `ButtonBuilder` to easily construct messages containing form inputs, dropdown selects, radio options, date pickers, and animations.
-- **Smart Caching**: `CacheManager` supports lazy loading of users, clans, and channels from the API when needed.
+- **Smart Caching**: `CacheManager` supports lazy loading of users, clans, and channels from the API when needed, with built-in support for both **in-memory** and **Redis-backed** caching (`StackExchange.Redis`).
 - **Local Storage**: Built-in SQLite database service for storing messages locally (`MessageDbService`).
 
 ---
 
-## 📂 Project Directory Structure
+## Project Directory Structure
 
 ```text
 Mezon-sdk/
@@ -43,13 +43,14 @@ Mezon-sdk/
 
 ---
 
-## 🛠 Installation
+## Installation
 
 The project targets **.NET 8.0** and relies on the following NuGet packages:
 - `Google.Protobuf` (v3.34.0)
 - `Grpc.Tools` (v2.78.0)
 - `Microsoft.EntityFrameworkCore.Sqlite` (v8.0.11)
 - `Microsoft.Data.SqlClient` (v7.0.0)
+- `StackExchange.Redis` (v2.7.33)
 
 To build the library, run the standard dotnet command:
 ```bash
@@ -58,7 +59,7 @@ dotnet build
 
 ---
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### 1. Initialize and Login Client
 
@@ -76,7 +77,8 @@ class Program
         // Initialize the client with your Client ID and API Key provided by Mezon
         var client = new MezonClient(
             clientId: "YOUR_CLIENT_ID",
-            apiKey: "YOUR_API_KEY"
+            apiKey: "YOUR_API_KEY",
+            redisConnectionString: "localhost:6379" // Optional: Enable Redis caching for Users, Clans, and Channels
         );
 
         // Login and enable auto-reconnection
@@ -165,7 +167,7 @@ await channel.SendEphemeralAsync(
 
 ---
 
-## 🎨 Building Interactive Messages
+## Building Interactive Messages
 
 ### 1. Messages with Buttons
 Use `ButtonBuilder` to define a control bar with one or more buttons, selecting from styles like `ButtonMessageStyle`:
