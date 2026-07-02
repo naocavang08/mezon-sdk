@@ -93,6 +93,7 @@ namespace Mezon_sdk
             string mmnApiUrl = DefaultMmnApi,
             string zkApiUrl = DefaultZkApi,
             string? redisConnectionString = null,
+            string? messageDbConnectionString = null,
             ILogger<MezonClient>? logger = null)
         {
             ClientId = clientId;
@@ -108,7 +109,7 @@ namespace Mezon_sdk
             LoginUrl = ApiUtils.BuildUrl(useSsl ? "https" : "http", host, port);
 
             EventManager = new EventManager();
-            MessageDb = new MessageDbService();
+            MessageDb = new MessageDbService(messageDbConnectionString);
 
             if (!string.IsNullOrEmpty(redisConnectionString))
             {

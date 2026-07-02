@@ -78,7 +78,8 @@ class Program
         var client = new MezonClient(
             clientId: "YOUR_CLIENT_ID",
             apiKey: "YOUR_API_KEY",
-            redisConnectionString: "localhost:6379" // Optional: Enable Redis caching for Users, Clans, and Channels
+            redisConnectionString: "localhost:6379", // Optional: Enable Redis caching for Users, Clans, and Channels
+            messageDbConnectionString: "Data Source=mezon_messages.db" // Optional: Persist messages to a physical SQLite file instead of Memory
         );
 
         // Login and enable auto-reconnection
