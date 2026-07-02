@@ -68,6 +68,33 @@ namespace Mezon_sdk.Constants
         public const string Notifications = InternalEventsSocket.Notifications;
         public const string QuickMenu = InternalEventsSocket.QuickMenu;
         public const string AiAgentEnable = InternalEventsSocket.AiAgentEnable;
+        public const string AiAgentSessionStarted = "session_started";
+        public const string AiAgentSessionEnded = "session_ended";
+        public const string AiAgentSessionSummaryDone = "room_summary_done";
+    }
+
+    public static class InternalAgentEvents
+    {
+        public const string SessionStarted = "session_started";
+        public const string SessionEnded = "session_ended";
+        public const string RoomSummaryDone = "room_summary_done";
+    }
+
+    public static class SSEEvents
+    {
+        public const string Open = "sse_open";
+        public const string Message = "sse_message";
+        public const string Error = "sse_error";
+        public const string Close = "sse_close";
+        public const string Reconnecting = "sse_reconnecting";
+        public const string Reconnected = "sse_reconnected";
+    }
+
+    public enum SSEConnectionState
+    {
+        Connecting = 0,
+        Open = 1,
+        Closed = 2
     }
 
     public enum ChannelType

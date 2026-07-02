@@ -28,6 +28,7 @@ namespace Mezon_sdk
         public const int DefaultTimeoutMs = 7000;
         public const string DefaultMmnApi = "https://dong.mezon.ai/mmn-api/";
         public const string DefaultZkApi = "https://dong.mezon.ai/zk-api/";
+        public const string DefaultAgentEventUrl = "http://172.16.110.19:8002/";
 
         public string ClientId { get; }
         public string ApiKey { get; }
@@ -35,6 +36,7 @@ namespace Mezon_sdk
         public int TimeoutMs { get; }
         public string MmnApiUrl { get; }
         public string ZkApiUrl { get; }
+        public string AgentEventUrl { get; }
         public bool UseSsl { get; }
 
         public CacheManager<long, Clan> Clans { get; }
@@ -47,6 +49,7 @@ namespace Mezon_sdk
         public SocketManager? SocketManager { get; private set; }
         public SessionManager? SessionManager { get; private set; }
         public ChannelManager? ChannelManager { get; private set; }
+        public EventSourceManager? AgentManager { get; private set; }
 
         public event Func<ApiPb.ChannelMessage, Task>? OnChannelMessage;
         public event Func<Rt.ChannelCreatedEvent, Task>? OnChannelCreated;
@@ -74,6 +77,9 @@ namespace Mezon_sdk
         public event Func<Rt.RoleAssignedEvent, Task>? OnRoleAssign;
         public event Func<Rt.Notifications, Task>? OnNotification;
         public event Func<Rt.AddClanUserEvent, Task>? OnAddClanUser;
+        public event Func<AIAgentSessionStartedEvent, Task>? OnAIAgentSessionStarted;
+        public event Func<AIAgentSessionEndedEvent, Task>? OnAIAgentSessionEnded;
+        public event Func<AIAgentSessionSummaryDoneEvent, Task>? OnAIAgentSessionSummaryDone;
 
         private readonly string _host;
         private readonly string _port;
@@ -92,6 +98,7 @@ namespace Mezon_sdk
             int timeoutMs = DefaultTimeoutMs,
             string mmnApiUrl = DefaultMmnApi,
             string zkApiUrl = DefaultZkApi,
+            string agentEventUrl = DefaultAgentEventUrl,
             string? redisConnectionString = null,
             string? messageDbConnectionString = null,
             ILogger<MezonClient>? logger = null)
@@ -101,6 +108,7 @@ namespace Mezon_sdk
             TimeoutMs = timeoutMs;
             MmnApiUrl = mmnApiUrl;
             ZkApiUrl = zkApiUrl;
+            AgentEventUrl = agentEventUrl;
             UseSsl = useSsl;
             _host = host;
             _port = port;
@@ -160,6 +168,9 @@ namespace Mezon_sdk
         public void OnRoleAssignEvent(Func<Rt.RoleAssignedEvent, Task> handler) => OnRoleAssign += handler;
         public void OnNotificationEvent(Func<Rt.Notifications, Task> handler) => OnNotification += handler;
         public void OnAddClanUserEvent(Func<Rt.AddClanUserEvent, Task> handler) => OnAddClanUser += handler;
+        public void OnAIAgentSessionStartedEvent(Func<AIAgentSessionStartedEvent, Task> handler) => OnAIAgentSessionStarted += handler;
+        public void OnAIAgentSessionEndedEvent(Func<AIAgentSessionEndedEvent, Task> handler) => OnAIAgentSessionEnded += handler;
+        public void OnAIAgentSessionSummaryDoneEvent(Func<AIAgentSessionSummaryDoneEvent, Task> handler) => OnAIAgentSessionSummaryDone += handler;
 
         public async Task<Session> GetSessionAsync()
         {
@@ -198,6 +209,19 @@ namespace Mezon_sdk
             SessionManager = new SessionManager(ApiClient, socketSession);
             ChannelManager = new ChannelManager(ApiClient, SocketManager, SessionManager);
 
+            if (!string.IsNullOrEmpty(AgentEventUrl))
+            {
+                AgentManager = new EventSourceManager(new SSEConfig
+                {
+                    Url = AgentEventUrl,
+                    AppId = ClientId,
+                    Token = ApiKey,
+                    AutoReconnect = true,
+                    ReconnectDelay = 3000
+                });
+                SetupSSEListeners();
+            }
+
             await SocketManager.ConnectAsync(socketSession);
 
             if (!string.IsNullOrWhiteSpace(socketSession.Token))
@@ -210,15 +234,24 @@ namespace Mezon_sdk
 
         public async Task LoginAsync(bool enableAutoReconnect = true)
         {
-            var session = await GetSessionAsync();
-            await InitializeManagersAsync(session);
-
-            _enableAutoReconnect = enableAutoReconnect;
-            _isHardDisconnect = false;
-
-            if (enableAutoReconnect)
+            try
             {
-                SetupReconnectHandlers();
+                var session = await GetSessionAsync();
+                await InitializeManagersAsync(session);
+
+                _enableAutoReconnect = enableAutoReconnect;
+                _isHardDisconnect = false;
+
+                if (enableAutoReconnect)
+                {
+                    SetupReconnectHandlers();
+                }
+            }
+            catch (Exception)
+            {
+                await CloseSocketAsync();
+                DisconnectMezonAgentSSE();
+                throw;
             }
         }
 
@@ -383,6 +416,7 @@ namespace Mezon_sdk
             }
 
             await CloseSocketAsync();
+            DisconnectMezonAgentSSE();
             _logger?.LogInformation("Client disconnected.");
         }
 
@@ -911,6 +945,76 @@ namespace Mezon_sdk
         private static Task InvokeEventAsync<T>(Func<T, Task>? handler, T message)
         {
             return handler != null ? handler.Invoke(message) : Task.CompletedTask;
+        }
+
+        public void ConnectMezonAgentSSE()
+        {
+            if (AgentManager == null)
+            {
+                return;
+            }
+            try
+            {
+                AgentManager.Connect("api/sse/metadata");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Failed to connect MezonAgent SSE.");
+            }
+        }
+
+        public void DisconnectMezonAgentSSE()
+        {
+            AgentManager?.Close();
+        }
+
+        private void SetupSSEListeners()
+        {
+            if (AgentManager != null)
+            {
+                AgentManager.OnMessage += HandleSSEMessage;
+            }
+        }
+
+        private void HandleSSEMessage(SSEMessage message)
+        {
+            try
+            {
+                var data = System.Text.Json.JsonSerializer.Deserialize<RoomMetadataEvent>(message.Data);
+                if (data == null || string.IsNullOrEmpty(data.EventType))
+                {
+                    return;
+                }
+
+                switch (data.EventType)
+                {
+                    case "room_started":
+                        var startedEvent = System.Text.Json.JsonSerializer.Deserialize<AIAgentSessionStartedEvent>(message.Data);
+                        if (startedEvent != null)
+                        {
+                            _ = InvokeEventAsync(OnAIAgentSessionStarted, startedEvent);
+                        }
+                        break;
+                    case "room_ended":
+                        var endedEvent = System.Text.Json.JsonSerializer.Deserialize<AIAgentSessionEndedEvent>(message.Data);
+                        if (endedEvent != null)
+                        {
+                            _ = InvokeEventAsync(OnAIAgentSessionEnded, endedEvent);
+                        }
+                        break;
+                    case "room_summary_done":
+                        var summaryEvent = System.Text.Json.JsonSerializer.Deserialize<AIAgentSessionSummaryDoneEvent>(message.Data);
+                        if (summaryEvent != null)
+                        {
+                            _ = InvokeEventAsync(OnAIAgentSessionSummaryDone, summaryEvent);
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Failed to parse and emit SSE AIAgent event.");
+            }
         }
     }
 }
