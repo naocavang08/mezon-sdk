@@ -25,17 +25,18 @@ namespace Mezon_sdk.Mmn.Utils
 
         public static SignedTx SignTx(Tx tx, byte[] pubKey, byte[] privKey)
         {
-            switch (privKey.Length)
+            if (privKey.Length != 32)
             {
-                case 32:
-                    privKey = Chaos.NaCl.Ed25519.ExpandedPrivateKeyFromSeed(privKey);
-                    break;
-                default:
-                    throw new ArgumentException("Unsupported private key length");
+                throw new ArgumentException("Unsupported private key length. Seed must be 32 bytes.");
             }
 
+            var privateKeyParams = new Org.BouncyCastle.Crypto.Parameters.Ed25519PrivateKeyParameters(privKey, 0);
             var txHash = Serialize(tx);
-            var signature = Chaos.NaCl.Ed25519.Sign(txHash, privKey);
+            
+            var signer = new Org.BouncyCastle.Crypto.Signers.Ed25519Signer();
+            signer.Init(true, privateKeyParams);
+            signer.BlockUpdate(txHash, 0, txHash.Length);
+            var signature = signer.GenerateSignature();
 
             if (tx.Type == (int)TxType.Faucet)
             {
@@ -69,7 +70,12 @@ namespace Mezon_sdk.Mmn.Utils
                 {
                     var pubKeyBytes = Base58Decode(tx.Sender);
                     var signatureBytes = Base58Decode(sig);
-                    return Chaos.NaCl.Ed25519.Verify(signatureBytes, txHashBytes, pubKeyBytes);
+                    
+                    var publicKeyParams = new Org.BouncyCastle.Crypto.Parameters.Ed25519PublicKeyParameters(pubKeyBytes, 0);
+                    var verifier = new Org.BouncyCastle.Crypto.Signers.Ed25519Signer();
+                    verifier.Init(false, publicKeyParams);
+                    verifier.BlockUpdate(txHashBytes, 0, txHashBytes.Length);
+                    return verifier.VerifySignature(signatureBytes);
                 }
                 catch (Exception ex)
                 {
@@ -88,7 +94,11 @@ namespace Mezon_sdk.Mmn.Utils
                     return false;
                 }
 
-                return Chaos.NaCl.Ed25519.Verify(userSig.Sig, txHashBytes, userSig.PubKey);
+                var publicKeyParams = new Org.BouncyCastle.Crypto.Parameters.Ed25519PublicKeyParameters(userSig.PubKey, 0);
+                var verifier = new Org.BouncyCastle.Crypto.Signers.Ed25519Signer();
+                verifier.Init(false, publicKeyParams);
+                verifier.BlockUpdate(txHashBytes, 0, txHashBytes.Length);
+                return verifier.VerifySignature(userSig.Sig);
             }
             catch (Exception ex)
             {
@@ -157,10 +167,9 @@ namespace Mezon_sdk.Mmn.Utils
                 rng.GetBytes(seed);
             }
 
-            var publicKey = new byte[Ed25519PublicKeySizeInBytes];
-            var expandedPrivateKey = new byte[Ed25519ExpandedPrivateKeySizeInBytes];
-
-            Chaos.NaCl.Ed25519.KeyPairFromSeed(publicKey, expandedPrivateKey, seed);
+            var privateKeyParams = new Org.BouncyCastle.Crypto.Parameters.Ed25519PrivateKeyParameters(seed, 0);
+            var publicKeyParams = privateKeyParams.GeneratePublicKey();
+            var publicKey = publicKeyParams.GetEncoded();
 
             // Return the seed (32 bytes) as privateKey, not the expanded version (64 bytes)
             // This matches what SignTx expects
