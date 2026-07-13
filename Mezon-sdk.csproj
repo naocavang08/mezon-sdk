@@ -27,9 +27,6 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.34.0" />
     <PackageReference Include="Grpc.Tools" Version="2.78.0">
       <PrivateAssets>all</PrivateAssets>
@@ -38,9 +35,15 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
     <PackageReference Include="StackExchange.Redis" Version="2.7.33" />
+    <PackageReference Include="Chaos.NaCl.Core" Version="1.0.0" />
+    <PackageReference Include="SimpleBase" Version="3.0.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.57.0" />
 
     <Protobuf Include="Protobuf/Api/api.proto" GrpcServices="Client" ProtoRoot="Protobuf" />
     <Protobuf Include="Protobuf/RtApi/realtime.proto" GrpcServices="Client" ProtoRoot="Protobuf" />
+    <Protobuf Include="Protobuf/Mmn/account.proto" GrpcServices="Client" ProtoRoot="Protobuf" />
+    <Protobuf Include="Protobuf/Mmn/health.proto" GrpcServices="Client" ProtoRoot="Protobuf" />
+    <Protobuf Include="Protobuf/Mmn/tx.proto" GrpcServices="Client" ProtoRoot="Protobuf" />
   </ItemGroup>
 
 </Project>

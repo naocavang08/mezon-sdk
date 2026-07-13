@@ -51,6 +51,13 @@ namespace Mezon_sdk
         public ChannelManager? ChannelManager { get; private set; }
         public EventSourceManager? AgentManager { get; private set; }
 
+        private Mezon_sdk.Mmn.MmnClient? _mmnClient;
+        public Mezon_sdk.Mmn.MmnClient? MmnClient => _mmnClient;
+        public (byte[] publicKey, byte[] privateKey)? KeyGen { get; private set; }
+        public string? AddressMMN { get; private set; }
+        public Mezon_sdk.Mmn.ProveResponseData? ZkProofs { get; private set; }
+        private Task? _mmnInitPromise;
+
         public event Func<ApiPb.ChannelMessage, Task>? OnChannelMessage;
         public event Func<Rt.ChannelCreatedEvent, Task>? OnChannelCreated;
         public event Func<Rt.ChannelUpdatedEvent, Task>? OnChannelUpdated;
@@ -220,6 +227,15 @@ namespace Mezon_sdk
                     ReconnectDelay = 3000
                 });
                 SetupSSEListeners();
+            }
+
+            if (!string.IsNullOrEmpty(MmnApiUrl) && !string.IsNullOrEmpty(ZkApiUrl))
+            {
+                _mmnClient = new Mezon_sdk.Mmn.MmnClient(new Mezon_sdk.Mmn.Models.Config
+                {
+                    Endpoint = MmnApiUrl,
+                    ZkProveEndpoint = ZkApiUrl
+                });
             }
 
             await SocketManager.ConnectAsync(socketSession);
@@ -398,6 +414,154 @@ namespace Mezon_sdk
             {
                 await SocketManager.DisconnectAsync();
             }
+        }
+
+        public async Task<(byte[] publicKey, byte[] privateKey)> GetEphemeralKeyPair()
+        {
+            if (_mmnClient == null)
+            {
+                throw new InvalidOperationException("MmnClient not initialized");
+            }
+            return Mezon_sdk.Mmn.Utils.CryptoHelper.GenerateEd25519KeyPair();
+        }
+
+        public string GetAddress(string userId)
+        {
+            if (_mmnClient == null)
+            {
+                throw new InvalidOperationException("MmnClient not initialized");
+            }
+            return Mezon_sdk.Mmn.Utils.CryptoHelper.GenerateAddress(userId);
+        }
+
+        public async Task<Mezon_sdk.Mmn.ProveResponse?> GetZkProofsAsync(string userId, string jwt, string address, string ephemeralPublicKey)
+        {
+            if (_mmnClient == null)
+            {
+                throw new InvalidOperationException("MmnClient not initialized");
+            }
+            return await _mmnClient.ZkProveClient.GenerateZkProof(userId, address, ephemeralPublicKey, jwt);
+        }
+
+        public async Task<ulong> GetCurrentNonceAsync(string address, string tag = "pending")
+        {
+            if (_mmnClient == null)
+            {
+                throw new InvalidOperationException("MmnClient not initialized");
+            }
+            return await _mmnClient.NodeClient.GetCurrentNonceAsync(address, tag);
+        }
+
+        public async Task MmnInitializedAsync(string idToken)
+        {
+            if (_mmnClient == null)
+            {
+                throw new InvalidOperationException("MmnClient not initialized");
+            }
+
+            if (KeyGen != null && AddressMMN != null && ZkProofs != null) return;
+
+            if (_mmnInitPromise != null)
+            {
+                await _mmnInitPromise;
+                return;
+            }
+
+            var tcs = new TaskCompletionSource();
+            _mmnInitPromise = tcs.Task;
+
+            try
+            {
+                if (KeyGen == null)
+                {
+                    KeyGen = await GetEphemeralKeyPair();
+                }
+
+                if (AddressMMN == null)
+                {
+                    AddressMMN = GetAddress(ClientId);
+                }
+
+                if (ZkProofs == null)
+                {
+                    var ephemeralPkHex = Mezon_sdk.Mmn.Utils.CryptoHelper.Base58Encode(KeyGen.Value.publicKey);
+                    var zkResponse = await GetZkProofsAsync(ClientId, idToken, AddressMMN, ephemeralPkHex);
+                    if (zkResponse?.Data == null)
+                    {
+                        throw new InvalidOperationException($"Failed to get ZkProofs: {zkResponse?.Error}");
+                    }
+                    ZkProofs = zkResponse.Data;
+                }
+                tcs.SetResult();
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
+                KeyGen = null;
+                AddressMMN = null;
+                ZkProofs = null;
+                _mmnInitPromise = null;
+                throw;
+            }
+        }
+
+        public async Task<Mezon_sdk.Mmn.Models.AddTxResponse> SendTokenAsync(APISentTokenRequest tokenEvent)
+        {
+            if (_mmnClient == null)
+            {
+                throw new InvalidOperationException("MmnClient not initialized");
+            }
+
+            if (KeyGen == null || AddressMMN == null || ZkProofs == null)
+            {
+                throw new InvalidOperationException("MMN not initialized. Call MmnInitializedAsync first.");
+            }
+
+            var senderId = tokenEvent.SenderId ?? ClientId;
+            var receiverId = tokenEvent.ReceiverId;
+
+            var mmnExtraInfo = new Dictionary<string, string>
+            {
+                ["ExtraAttribute"] = tokenEvent.ExtraAttribute ?? "",
+                ["UserSenderUsername"] = tokenEvent.SenderName ?? "",
+                ["type"] = "transfer_token",
+                ["UserSenderId"] = senderId,
+                ["UserReceiverId"] = receiverId
+            };
+
+            if (tokenEvent.MmnExtraInfo != null)
+            {
+                foreach (var pair in tokenEvent.MmnExtraInfo)
+                {
+                    mmnExtraInfo[pair.Key] = pair.Value;
+                }
+            }
+
+            var rawAmount = new System.Numerics.BigInteger(tokenEvent.Amount * (decimal)Math.Pow(10, Mezon_sdk.Mmn.Utils.Constants.NativeDecimal));
+            var nonce = await GetCurrentNonceAsync(AddressMMN, "pending");
+
+            var tx = Mezon_sdk.Mmn.Utils.CryptoHelper.BuildTransferTx(
+                txType: (int)Mezon_sdk.Mmn.Models.TxType.Transfer,
+                sender: AddressMMN,
+                recipient: GetAddress(receiverId),
+                amount: rawAmount,
+                nonce: nonce + 1,
+                timestamp: (ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                textData: tokenEvent.Note ?? "Transfer funds",
+                extraInfo: mmnExtraInfo,
+                zkProof: ZkProofs.Proof ?? "",
+                zkPub: ZkProofs.PublicInput ?? ""
+            );
+
+            var signedTx = Mezon_sdk.Mmn.Utils.CryptoHelper.SignTx(tx, KeyGen.Value.publicKey, KeyGen.Value.privateKey);
+            var result = await _mmnClient.NodeClient.AddTxAsync(signedTx);
+
+            if (!result.Ok)
+            {
+                throw new InvalidOperationException($"Transaction failed: {result.Error}");
+            }
+
+            return result;
         }
 
         public async Task DisconnectAsync()
