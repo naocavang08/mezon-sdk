@@ -14,6 +14,7 @@
 - **Interactive Messages & Forms**: Provides `InteractiveBuilder` and `ButtonBuilder` to easily construct messages containing form inputs, dropdown selects, radio options, date pickers, and animations.
 - **Smart Caching**: `CacheManager` supports lazy loading of users, clans, and channels from the API when needed, with built-in support for both **in-memory** and **Redis-backed** caching (`StackExchange.Redis`).
 - **Local Storage**: Built-in SQLite database service for storing messages locally (`MessageDbService`).
+- **Blockchain / On-Chain MMN Support**: Integrated MMN Wallet client allowing bot-to-user withdrawals and token transfers, utilizing ZK proofs (Zero-Knowledge) and cryptography.
 
 ---
 
@@ -63,7 +64,7 @@ dotnet build
 
 ### 1. Initialize and Login Client
 
-`MezonClient` is the central class to start your application. Calling `LoginAsync` automatically authenticates the session, opens the WebSocket connection, and starts the data managers.
+`MezonClient` is the central class of your application. You can configure optional SQLite storage for messages or a Redis connection string for external caching.
 
 ```csharp
 using System;
@@ -78,11 +79,15 @@ class Program
         var client = new MezonClient(
             clientId: "YOUR_CLIENT_ID",
             apiKey: "YOUR_API_KEY",
-            redisConnectionString: "localhost:6379", // Optional: Enable Redis caching for Users, Clans, and Channels
-            messageDbConnectionString: "Data Source=mezon_messages.db" // Optional: Persist messages to a physical SQLite file instead of Memory
+            
+            // Optional: Enable Redis caching for Users, Clans, and Channels
+            redisConnectionString: "localhost:6379",
+            
+            // Optional: Persist messages to a physical SQLite database
+            messageDbConnectionString: "Data Source=mezon_messages.db"
         );
 
-        // Login and enable auto-reconnection
+        // Login and enable automatic reconnection
         await client.LoginAsync(enableAutoReconnect: true);
         Console.WriteLine("LoggedIn to Mezon successfully!");
 
@@ -92,9 +97,23 @@ class Program
 }
 ```
 
-### 2. Event Handling
+### 2. Session and Authentication
 
-You can listen to new messages or user interactions through events on the `MezonClient`:
+You can retrieve the session metadata containing authentication tokens and API/WebSocket endpoints.
+
+```csharp
+// Retrieve the authenticated session
+var session = await client.GetSessionAsync();
+
+Console.WriteLine($"Session Token: {session.Token}");
+Console.WriteLine($"ID Token: {session.IdToken}");
+Console.WriteLine($"API Gateway Url: {session.ApiUrl}");
+Console.WriteLine($"WebSocket Url: {session.WsUrl}");
+```
+
+### 3. Event Handling
+
+`MezonClient` supports a wide array of event handlers for real-time WebSocket activities. You can subscribe to them to respond to user messages, UI interactions, voice statuses, and agent workflows.
 
 ```csharp
 // Subscribe to new messages from channels
@@ -103,89 +122,214 @@ client.OnChannelMessage += async (protoMessage) =>
     long channelId = protoMessage.ChannelId;
     long senderId = protoMessage.SenderId;
     
-    // Use the Model helper to decode the JSON content easily
+    // Decode JSON content
     var channelMsg = Mezon_sdk.Models.ChannelMessage.FromProtobuf(protoMessage);
-    
     if (channelMsg.Content != null && channelMsg.Content.TryGetValue("t", out var textObj))
     {
         string text = textObj?.ToString() ?? "";
         Console.WriteLine($"[Channel: {channelId}] User {senderId} sent: {text}");
-
-        // Echo bot mechanism (avoiding responding to itself)
-        if (senderId != long.Parse(client.ClientId))
-        {
-            var channel = await client.GetChannelFromIdAsync(channelId);
-            await channel.SendAsync(new Mezon_sdk.Models.ChannelMessageContent
-            {
-                Text = $"Bot received: {text}"
-            });
-        }
     }
 };
 
-// Subscribe to button click interactions
+// Listen to button click interactions
 client.OnMessageButtonClicked += async (btnEvent) =>
 {
-    Console.WriteLine($"Button clicked: {btnEvent.ButtonId} by user: {btnEvent.UserId}");
+    Console.WriteLine($"Button {btnEvent.ButtonId} clicked by User {btnEvent.UserId} on Message {btnEvent.MessageId}");
     await Task.CompletedTask;
+};
+
+// Listen to dropdown select box choices
+client.OnDropdownBoxSelected += async (dropdownEvent) =>
+{
+    Console.WriteLine($"Dropdown selected on Message: {dropdownEvent.MessageId}");
+    await Task.CompletedTask;
+};
+
+// Listen to Voice / Meeting events
+client.OnVoiceStarted += async (voiceEvent) =>
+{
+    Console.WriteLine($"Voice session started in Clan: {voiceEvent.ClanId}, Channel: {voiceEvent.ChannelId}");
+};
+
+client.OnVoiceJoined += async (joinEvent) =>
+{
+    Console.WriteLine($"User {joinEvent.UserId} joined voice channel {joinEvent.ChannelId}");
+};
+
+// Listen to SSE AI Agent lifecycle events
+client.OnAIAgentSessionStarted += async (startedEvent) =>
+{
+    Console.WriteLine($"AI Agent Session Started for room: {startedEvent.RoomId}");
+};
+
+client.OnAIAgentSessionEnded += async (endedEvent) =>
+{
+    Console.WriteLine($"AI Agent Session Ended for room: {endedEvent.RoomId}");
 };
 ```
 
-### 3. Common Message Operations
+### 4. Messaging Operations
 
-Once you have a channel or message object, you can perform various actions:
+When you obtain a channel or message object, you can perform standard messaging actions:
 
-#### Send a new message to a channel
+#### Send a message to a channel
 ```csharp
 var channel = await client.GetChannelFromIdAsync(channelId);
-await channel.SendAsync(new ChannelMessageContent { Text = "Hello world!" });
+var msgAck = await channel.SendAsync(new Mezon_sdk.Models.ChannelMessageContent 
+{ 
+    Text = "Hello, this is a standard message!" 
+});
 ```
 
-#### Reply, Update, React, and Delete Messages
+#### Reply to a message
 ```csharp
-// Replying to a message
-await message.ReplyAsync(new ChannelMessageContent { Text = "I agree with this!" });
+// "message" is a Message object
+var replyAck = await message.ReplyAsync(new Mezon_sdk.Models.ChannelMessageContent 
+{ 
+    Text = "This is a direct reply to your message" 
+});
+```
 
-// React to a message (emoji: ❤️)
-await message.ReactAsync(emojiId: 0, emoji: "❤️", count: 1);
+#### React to a message
+```csharp
+// React to a message with a specific emoji (e.g. ❤️)
+var reactionResult = await message.ReactAsync(emojiId: 0, emoji: "❤️", count: 1);
+```
 
-// Editing a message
-await message.UpdateAsync(new ChannelMessageContent { Text = "Updated content" });
+#### Edit/Update a message
+```csharp
+var updateAck = await message.UpdateAsync(new Mezon_sdk.Models.ChannelMessageContent 
+{ 
+    Text = "This content has been edited" 
+});
+```
 
-// Deleting a message
+#### Delete a message
+```csharp
 await message.DeleteAsync();
 ```
 
 #### Send an Ephemeral Message
-Ephemeral messages are only visible to the specified recipient user(s):
+Ephemeral messages are private messages only visible to the specified recipient user(s):
 ```csharp
-var receivers = new List<long> { 1234567890L }; // Recipient user IDs
+var receivers = new List<long> { 1967925734009737216L };
 await channel.SendEphemeralAsync(
     receiverIds: receivers,
-    content: new ChannelMessageContent { Text = "This is a secret message only you can see!" }
+    content: new Mezon_sdk.Models.ChannelMessageContent { Text = "This is a secret message only you can see!" }
 );
 ```
 
----
+### 5. Clan Operations
 
-## Building Interactive Messages
+Clans are workspaces containing text/voice channels and members. You can query and manage resources within a Clan.
 
-### 1. Messages with Buttons
-Use `ButtonBuilder` to define a control bar with one or more buttons, selecting from styles like `ButtonMessageStyle`:
+```csharp
+// Retrieve a clan by ID (will query API and cache the result)
+var clan = await client.GetClanFromIdAsync(clanId);
+Console.WriteLine($"Clan Name: {clan.Name}");
+
+// Load all channels in the Clan into cache
+await clan.LoadChannelsAsync();
+
+// List users currently in a voice channel
+var voiceUsers = await clan.ListChannelVoiceUsersAsync(
+    channelId: voiceChannelId,
+    limit: 100
+);
+
+// List roles defined in the Clan
+var roles = await clan.ListRolesAsync(limit: 50);
+
+// Update permissions or properties of a Clan Role
+var updateRequest = new Mezon.Net.Internal.Api.UpdateRoleRequest
+{
+    RoleName = "New Admin Name",
+    Color = "#FF5733"
+};
+bool success = await clan.UpdateRoleAsync(roleId: 12345, updateRequest);
+```
+
+### 6. Channel Operations
+
+Channels can be text, voice, forums, threads, etc. Use `GetChannelFromIdAsync` to query details:
+
+```csharp
+// Retrieve a channel by ID (cached or fetched)
+var channel = await client.GetChannelFromIdAsync(channelId);
+Console.WriteLine($"Channel Name: {channel.Name}, Type: {channel.ChannelType}");
+
+// Access messages of this channel cached locally in-memory
+var cachedMessages = channel.Messages;
+```
+
+### 7. User & Direct Messages (DM)
+
+You can look up user profiles and establish DM conversations.
+
+```csharp
+// Fetch user profile (cached or fetched)
+var user = await client.GetUserFromIdAsync(userId);
+Console.WriteLine($"Username: {user.Username}, DisplayName: {user.DisplayName}");
+
+// Create a DM channel with the user explicitly
+var dmChannelDesc = await user.CreateDmChannelAsync();
+
+// Send a direct message to the user (automatically resolves or creates the DM channel)
+await user.SendDmMessageAsync(new Mezon_sdk.Models.ChannelMessageContent
+{
+    Text = "Hello! This is a direct message from the bot."
+});
+```
+
+### 8. Quick Menu Actions
+
+Quick Menus are shortcut buttons shown in the chat interface that allow users to quickly trigger bot commands.
+
+```csharp
+// Add a quick menu action button
+var quickMenu = await client.AddQuickMenuAccessAsync(
+    channelId: (int)channelId,
+    clanId: (int)clanId,
+    menuType: 1,
+    actionMsg: "/help",
+    background: "#2ecc71",
+    menuName: "Get Help"
+);
+
+// List quick menu actions configured for a specific channel
+var menuList = await client.ListQuickMenuAccessAsync(
+    botId: checked((int)long.Parse(client.ClientId)),
+    channelId: (int)channelId
+);
+
+// Delete a quick menu shortcut
+await client.DeleteQuickMenuAccessAsync(
+    id: quickMenu.Id,
+    clanId: (int)clanId,
+    channelId: (int)channelId
+);
+```
+
+### 9. Interactive Messages & Buttons
+
+Interactive messages enhance chatbot responsiveness with form elements, buttons, and structured inputs.
+
+#### Messages with Clickable Buttons
+Define a control row with buttons having various styles (`Primary`, `Secondary`, `Success`, `Danger`, `Link`):
 
 ```csharp
 using Mezon_sdk.Structures;
 using Mezon_sdk.Models;
 using Mezon_sdk.Constants;
 
-// 1. Build a list of buttons
+// 1. Add buttons using ButtonBuilder
 var buttons = new ButtonBuilder()
-    .AddButton("btn_accept", "Accept", ButtonMessageStyle.Success)
-    .AddButton("btn_decline", "Decline", ButtonMessageStyle.Danger)
-    .AddButton("btn_info", "Details", ButtonMessageStyle.Primary, url: "https://mezon.ai")
+    .AddButton("btn_approve", "Approve", ButtonMessageStyle.Success)
+    .AddButton("btn_reject", "Reject", ButtonMessageStyle.Danger)
+    .AddButton("btn_info", "Read Wiki", ButtonMessageStyle.Link, url: "https://wiki.mezon.ai")
     .Build();
 
-// 2. Convert to message ActionRow component structure
+// 2. Convert button dictionary definitions to message ActionRow component structure
 var actionRow = new MessageActionRow
 {
     Components = buttons.ConvertAll(b => new MessageComponent
@@ -196,51 +340,93 @@ var actionRow = new MessageActionRow
     })
 };
 
-// 3. Send the message with buttons
+// 3. Send the message containing the button components
 await channel.SendAsync(new ChannelMessageContent
 {
-    Text = "Do you agree to join this project?",
+    Text = "Pending request: Please choose an action below.",
     Components = new List<MessageActionRow> { actionRow }
 });
 ```
 
-### 2. Building Rich Interactive Forms
-`InteractiveBuilder` allows you to show messages with inputs, select dropdowns, radio options, date pickers, or animations:
+#### Interactive Forms (Inputs, Selects, Radios, and Date Pickers)
+Use `InteractiveBuilder` to build forms containing text areas, dropdown lists, radio choices, date selection, or animation configs:
 
 ```csharp
-var form = new InteractiveBuilder(title: "Project Feedback Survey")
-    .SetDescription("Please fill out the form below:")
-    .SetColor("#3498db") // Embed color
-    .SetThumbnail("https://example.com/logo.png")
+using Mezon_sdk.Structures;
+using Mezon_sdk.Models;
+using System.Text.Json;
+
+var form = new InteractiveBuilder(title: "Event Registration Form")
+    .SetDescription("Provide your details to register for the upcoming hackathon:")
+    .SetColor("#9b59b6")
+    .SetThumbnail("https://example.com/hackathon_logo.png")
     
     // Add text input field
-    .AddInputField(fieldId: "txt_feedback", name: "Feedback", placeholder: "Type your comment here...")
+    .AddInputField(fieldId: "txt_teamname", name: "Team Name", placeholder: "Enter your team's name...")
     
-    // Add single selection dropdown (Select)
-    .AddSelectField(fieldId: "sel_rating", name: "Satisfaction Level", options: new List<SelectFieldOption>
+    // Add dropdown select list
+    .AddSelectField(fieldId: "sel_size", name: "Team Size", options: new List<SelectFieldOption>
     {
-        new SelectFieldOption { Value = "5", Label = "Very Satisfied" },
-        new SelectFieldOption { Value = "3", Label = "Neutral" },
-        new SelectFieldOption { Value = "1", Label = "Not Satisfied" }
+        new SelectFieldOption { Value = "2-3", Label = "2 to 3 members" },
+        new SelectFieldOption { Value = "4-5", Label = "4 to 5 members" }
     })
     
-    // Add radio group selection
-    .AddRadioField(fieldId: "rad_join", name: "Will you attend the next event?", options: new List<RadioFieldOption>
+    // Add radio group choices
+    .AddRadioField(fieldId: "rad_track", name: "Choose Hackathon Track", options: new List<RadioFieldOption>
     {
-        new RadioFieldOption { Value = "yes", Label = "Yes, I will attend" },
-        new RadioFieldOption { Value = "no", Label = "No, I am busy" }
+        new RadioFieldOption { Value = "ai", Label = "Artificial Intelligence" },
+        new RadioFieldOption { Value = "web3", Label = "Web3 & Blockchain" }
     })
     
-    // Add a datepicker component
-    .AddDatepickerField(fieldId: "dt_date", name: "Suggested Date")
+    // Add date picker calendar field
+    .AddDatepickerField(fieldId: "dt_arrival", name: "Arrival Date")
     .Build();
 
-// Wrap the form into embed properties and send
+// Serialize and deserialize to the required DTO structure
 var embedProps = JsonSerializer.Deserialize<InteractiveMessageProps>(JsonSerializer.Serialize(form));
+
 await channel.SendAsync(new ChannelMessageContent
 {
     Embed = new List<InteractiveMessageProps> { embedProps! }
 });
+```
+
+### 10. Blockchain / Token Transfer (MMN Wallet)
+
+The Mezon SDK has native client interfaces for interaction with the MMN Blockchain Node and Zero-Knowledge (ZK) Proof generators. This allows bots to send token transactions on-chain to user addresses (e.g. for payments or withdrawals).
+
+```csharp
+using Mezon_sdk.Models;
+
+// 1. Get current session to access ID Token
+var session = await client.GetSessionAsync();
+
+// 2. Initialize the MMN Blockchain Client (generates cryptographic keypair, derives address, and fetches ZK Proofs)
+await client.MmnInitializedAsync(session.IdToken);
+Console.WriteLine($"Bot Wallet Address: {client.AddressMMN}");
+
+// 3. Construct a token sending request
+var withdrawRequest = new APISentTokenRequest
+{
+    SenderId = client.ClientId,
+    SenderName = "Bot Payment Gateway",
+    ReceiverId = "1967925734009737216", // Target user's Mezon ID
+    Amount = 10.0m,                     // Amount in token units
+    Note = "Weekly developer rewards payout"
+};
+
+// 4. Send token on-chain
+var txResult = await client.SendTokenAsync(withdrawRequest);
+
+if (txResult.Ok)
+{
+    Console.WriteLine("Blockchain transfer successful!");
+    Console.WriteLine($"Transaction Hash: {txResult.TxHash}");
+}
+else
+{
+    Console.WriteLine($"Transfer failed: {txResult.Error}");
+}
 ```
 
 ---

@@ -22,10 +22,10 @@ namespace Mezon_sdk.Structures
         public int? CreateTimeSeconds { get; set; }
 
         [JsonIgnore]
-        public TextChannel Channel { get; set; }
+        public TextChannel Channel { get; set; } = null!;
         
         [JsonIgnore]
-        public SocketManager SocketManager { get; set; }
+        public SocketManager SocketManager { get; set; } = null!;
 
         public Message() { }
 

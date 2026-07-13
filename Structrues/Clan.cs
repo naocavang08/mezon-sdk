@@ -11,7 +11,7 @@ namespace Mezon_sdk.Structures
     public class Clan
     {
         public long Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public long WelcomeChannelId { get; set; }
         
         // Client property typed as dynamic as MezonClient is not defined yet
@@ -20,20 +20,20 @@ namespace Mezon_sdk.Structures
         public int ClientId { get; set; }
 
         [JsonIgnore]
-        public MezonApi ApiClient { get; set; }
+        public MezonApi ApiClient { get; set; } = null!;
         
         [JsonIgnore]
-        public SocketManager SocketManager { get; set; }
+        public SocketManager SocketManager { get; set; } = null!;
         
-        public string SessionToken { get; set; }
+        public string SessionToken { get; set; } = string.Empty;
         
         [JsonIgnore]
-        public MessageDbService Service { get; set; }
+        public MessageDbService Service { get; set; } = null!;
 
         private bool _channelsLoaded = false;
 
         [JsonIgnore]
-        public CacheManager<long, TextChannel> Channels { get; set; }
+        public CacheManager<long, TextChannel> Channels { get; set; } = null!;
 
         public Clan() { }
 

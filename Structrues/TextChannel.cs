@@ -14,21 +14,21 @@ namespace Mezon_sdk.Structures
         public int? ChannelType { get; set; }
         public bool IsPrivate { get; set; }
         public long CategoryId { get; set; }
-        public string CategoryName { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
         public long ParentId { get; set; }
-        public string MeetingCode { get; set; }
+        public string MeetingCode { get; set; } = string.Empty;
         public long ClanId { get; set; }
         [JsonIgnore]
-        public Clan Clan { get; set; }
+        public Clan Clan { get; set; } = null!;
 
         [JsonIgnore]
-        public CacheManager<long, Message> Messages { get; set; }
+        public CacheManager<long, Message> Messages { get; set; } = null!;
         
         [JsonIgnore]
-        public SocketManager SocketManager { get; set; }
+        public SocketManager SocketManager { get; set; } = null!;
         
         [JsonIgnore]
-        public MessageDbService Service { get; set; }
+        public MessageDbService Service { get; set; } = null!;
 
         public TextChannel() { }
 

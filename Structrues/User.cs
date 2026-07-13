@@ -16,10 +16,10 @@ namespace Mezon_sdk.Structures
         public string? ClanAvatar { get; set; }
         public string? DisplayName { get; set; }
         [JsonIgnore]
-        public ChannelManager ChannelManager { get; set; }
+        public ChannelManager ChannelManager { get; set; } = null!;
         
         [JsonIgnore]
-        public SocketManager SocketManager { get; set; }
+        public SocketManager SocketManager { get; set; } = null!;
         
         public User() { }
         
