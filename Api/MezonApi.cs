@@ -34,6 +34,13 @@ public class MezonApi
         _httpClient.Timeout = TimeSpan.FromMilliseconds(timeoutMs);
     }
 
+    private Mezon_sdk.Socket.DefaultSocket? _socket;
+
+    public void AttachSocket(Mezon_sdk.Socket.DefaultSocket socket)
+    {
+        _socket = socket;
+    }
+
     // ========================
     // CORE CALL API
     // ========================
@@ -44,6 +51,23 @@ public class MezonApi
         string? bearerToken = null,
         bool isBinary = true)
     {
+        if (_socket != null && _socket.IsOpen() && urlPath.StartsWith("/mezon.api.Mezon/"))
+        {
+            var apiName = urlPath.Substring("/mezon.api.Mezon/".Length);
+            try
+            {
+                var socketData = await _socket.SendApiRequestAsync(apiName, body ?? System.Array.Empty<byte>());
+                if (socketData != null)
+                {
+                    return socketData;
+                }
+            }
+            catch
+            {
+                // Fall back to HTTP if WebSocket RPC attempt fails or is unsupported
+            }
+        }
+
         await _rateLimiter.WaitAsync();
         try
         {
@@ -156,7 +180,7 @@ public class MezonApi
     // ========================
     public async Task<ApiChannelDescList> ListChannelsAsync(
         string token,
-        int clanId = 0,
+        long clanId = 0,
         int channelType = 0,
         int limit = 0,
         int state = 0,
@@ -331,8 +355,8 @@ public class MezonApi
     // ========================
     public async Task<ApiVoiceChannelUserList> ListChannelVoiceUsersAsync(
         string token,
-        int clanId = 0,
-        int channelId = 0,
+        long clanId = 0,
+        long channelId = 0,
         int channelType = 0,
         int limit = 0,
         int state = 0,
@@ -391,7 +415,7 @@ public class MezonApi
     // ========================
     public async Task<ApiRoleListEventResponse> ListRolesAsync(
         string token,
-        int clanId = 0,
+        long clanId = 0,
         int limit = 0,
         int state = 0,
         string cursor = "")

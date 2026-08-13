@@ -29,6 +29,8 @@ namespace Mezon_sdk.Socket
 		public Session? Session { get; private set; }
 
 		private readonly ConcurrentDictionary<int, PromiseExecutor> _cids = new();
+		private readonly ConcurrentDictionary<ushort, TaskCompletionSource<byte[]>> _apiCids = new();
+		private readonly ConcurrentDictionary<ushort, List<byte>> _apiChunkBuffers = new();
 		private long _nextCid = 1;
 
 		private readonly int _heartbeatTimeoutMs;
@@ -139,8 +141,45 @@ namespace Mezon_sdk.Socket
 			{
 				await Adapter.ReceiveLoopAsync(async bytes =>
 				{
-					if (cancellationToken.IsCancellationRequested)
+					if (cancellationToken.IsCancellationRequested || bytes == null || bytes.Length == 0)
 					{
+						return;
+					}
+
+					if (bytes[0] == 0xFF)
+					{
+						if (bytes.Length >= 7)
+						{
+							ushort cid = (ushort)((bytes[1] << 8) | bytes[2]);
+							uint codeRaw = (uint)((bytes[3] << 24) | (bytes[4] << 16) | (bytes[5] << 8) | bytes[6]);
+							uint errCode = (codeRaw >> 16) & 0xFFFF;
+							bool fin = (codeRaw & 0xFFFF) == 0xFF;
+
+							byte[] payload = new byte[bytes.Length - 7];
+							System.Array.Copy(bytes, 7, payload, 0, payload.Length);
+
+							var buffer = _apiChunkBuffers.GetOrAdd(cid, _ => new List<byte>());
+							lock (buffer)
+							{
+								buffer.AddRange(payload);
+							}
+
+							if (fin)
+							{
+								_apiChunkBuffers.TryRemove(cid, out _);
+								if (_apiCids.TryRemove(cid, out var tcs))
+								{
+									if (errCode != 0)
+									{
+										tcs.TrySetException(new Exception($"API response failed with code {errCode}"));
+									}
+									else
+									{
+										tcs.TrySetResult(buffer.ToArray());
+									}
+								}
+							}
+						}
 						return;
 					}
 
@@ -349,6 +388,48 @@ namespace Mezon_sdk.Socket
 
 			await SendWithCidAsync(envelope);
 			return envelope.ClanJoin;
+		}
+
+		public async Task<byte[]> SendApiRequestAsync(string apiName, byte[] body, int? timeoutMs = null)
+		{
+			if (!Mezon_sdk.Api.ApiNames.TryGetApiIndex(apiName, out var apiIndex))
+			{
+				throw new ArgumentException($"Unknown API name: {apiName}");
+			}
+
+			if (!Adapter.IsOpen())
+			{
+				throw new InvalidOperationException("Socket connection is not established.");
+			}
+
+			var cid = GenerateCid();
+			ushort cidShort = (ushort)(cid & 0xFFFF);
+
+			var envelope = new Rt.Envelope
+			{
+				Cid = cid,
+				ApiRequestEvent = new Rt.ApiRequestEvent
+				{
+					ApiIndex = apiIndex,
+					ApiName = apiName,
+					Body = ByteString.CopyFrom(body ?? System.Array.Empty<byte>())
+				}
+			};
+
+			var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+			_apiCids[cidShort] = tcs;
+
+			var effectiveTimeout = timeoutMs ?? SendTimeoutMs;
+			using var cts = new CancellationTokenSource(effectiveTimeout);
+			cts.Token.Register(() =>
+			{
+				_apiCids.TryRemove(cidShort, out _);
+				_apiChunkBuffers.TryRemove(cidShort, out _);
+				tcs.TrySetException(new TimeoutException($"API request {apiName} timed out after {effectiveTimeout}ms"));
+			});
+
+			await Adapter.SendAsync(envelope);
+			return await tcs.Task;
 		}
 
 		public async Task<Rt.ChannelJoin> JoinChatAsync(long clanId, long channelId, int channelType, bool isPublic = true)

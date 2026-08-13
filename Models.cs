@@ -309,10 +309,10 @@ namespace Mezon_sdk.Models
     public class ApiCreateChannelDescRequest : MezonBaseModel<ApiCreateChannelDescRequest>
     {
         [JsonPropertyName("category_id")]
-        public int? CategoryId { get; set; }
+        public long? CategoryId { get; set; }
 
         [JsonPropertyName("channel_id")]
-        public int? ChannelId { get; set; }
+        public long? ChannelId { get; set; }
 
         [JsonPropertyName("channel_label")]
         public string? ChannelLabel { get; set; }
@@ -321,10 +321,10 @@ namespace Mezon_sdk.Models
         public int? ChannelPrivate { get; set; }
 
         [JsonPropertyName("clan_id")]
-        public int? ClanId { get; set; }
+        public long? ClanId { get; set; }
 
         [JsonPropertyName("parent_id")]
-        public int? ParentId { get; set; }
+        public long? ParentId { get; set; }
 
         [JsonPropertyName("type")]
         public int? Type { get; set; }

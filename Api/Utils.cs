@@ -75,6 +75,17 @@ namespace Mezon_sdk.Api
 
         public static (string Scheme, string Hostname, bool UseSsl, string Port) ParseUrlComponents(string url, bool useSsl = false)
         {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return ("https", "", true, "443");
+            }
+            if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) &&
+                !url.StartsWith("ws://", StringComparison.OrdinalIgnoreCase) &&
+                !url.StartsWith("wss://", StringComparison.OrdinalIgnoreCase))
+            {
+                url = (useSsl ? "https://" : "http://") + url;
+            }
             var uri = new Uri(url);
             var scheme = uri.Scheme;
             useSsl = useSsl || IsSchemaSecure(scheme);

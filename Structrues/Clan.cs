@@ -122,7 +122,7 @@ namespace Mezon_sdk.Structures
             var channelsResponse = await ApiClient.ListChannelsAsync(
                 token: SessionToken,
                 channelType: (int)ChannelType.ChannelTypeChannel,
-                clanId: checked((int)Id)
+                clanId: Id
             );
 
             var validChannels = channelsResponse?.Channeldesc?
@@ -175,7 +175,7 @@ namespace Mezon_sdk.Structures
 
             var result = await ApiClient.ListChannelVoiceUsersAsync(
                 token: SessionToken,
-                clanId: checked((int)Id),
+                clanId: Id,
                 channelId: channelId,
                 channelType: channelType.Value,
                 limit: limit,
@@ -202,7 +202,7 @@ namespace Mezon_sdk.Structures
         {
             return await ApiClient.ListRolesAsync(
                 token: SessionToken,
-                clanId: checked((int)Id),
+                clanId: Id,
                 limit: limit,
                 state: state,
                 cursor: cursor
@@ -211,7 +211,7 @@ namespace Mezon_sdk.Structures
 
         public async Task<ApiChannelDescription> CreateChannelAsync(ApiCreateChannelDescRequest request)
         {
-            request.ClanId = checked((int)Id);
+            request.ClanId = Id;
             return await ApiClient.CreateChannelAsync(SessionToken, request);
         }
 
