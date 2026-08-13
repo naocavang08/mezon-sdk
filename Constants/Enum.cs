@@ -9,6 +9,7 @@ namespace Mezon_sdk.Constants
         public const string ChannelCreatedEvent = "channel_created_event";
         public const string ChannelDeletedEvent = "channel_deleted_event";
         public const string ChannelUpdatedEvent = "channel_updated_event";
+        public const string ChannelArchiveEvent = "channel_archive_event";
         public const string ClanProfileUpdatedEvent = "clan_profile_updated_event";
         public const string ClanUpdatedEvent = "clan_updated_event";
         public const string StatusPresenceEvent = "status_presence_event";
@@ -50,6 +51,7 @@ namespace Mezon_sdk.Constants
         public const string ChannelCreated = InternalEventsSocket.ChannelCreatedEvent;
         public const string ChannelDeleted = InternalEventsSocket.ChannelDeletedEvent;
         public const string ChannelUpdated = InternalEventsSocket.ChannelUpdatedEvent;
+        public const string ChannelArchive = InternalEventsSocket.ChannelArchiveEvent;
         public const string RoleEvent = InternalEventsSocket.RoleEvent;
         public const string GiveCoffee = InternalEventsSocket.GiveCoffeeEvent;
         public const string RoleAssign = InternalEventsSocket.RoleAssignEvent;
@@ -137,6 +139,9 @@ namespace Mezon_sdk.Constants
         Ephemeral = 12,
         UpcomingEvent = 13,
         UpdateEphemeralMsg = 14,
-        DeleteEphemeralMsg = 15
+        DeleteEphemeralMsg = 15,
+        Contact = 16,
+        Location = 17,
+        Poll = 18
     }
 }
