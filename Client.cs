@@ -213,6 +213,8 @@ namespace Mezon_sdk
                 SocketManager.ApiClient = ApiClient;
             }
 
+            ApiClient.AttachSocket(SocketManager.GetSocket());
+
             SessionManager = new SessionManager(ApiClient, socketSession);
             ChannelManager = new ChannelManager(ApiClient, SocketManager, SessionManager);
 
