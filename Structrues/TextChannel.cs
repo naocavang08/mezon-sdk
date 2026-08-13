@@ -297,6 +297,56 @@ namespace Mezon_sdk.Structures
             return await Clan.ApiClient.PlayMediaAsync(sessionToken, payload);
         }
 
+        public async Task UpdateAsync(
+            string? channelLabel = null,
+            long? categoryId = null,
+            string? topic = null,
+            string? channelAvatar = null,
+            int? ageRestricted = null,
+            int? e2ee = null)
+        {
+            if (!Id.HasValue || Clan?.ApiClient == null) return;
+
+            var req = new ApiUpdateChannelDescRequest
+            {
+                ClanId = Clan.Id,
+                ChannelId = Id.Value,
+                ChannelLabel = channelLabel ?? Name,
+                CategoryId = categoryId ?? CategoryId,
+                Topic = topic,
+                ChannelAvatar = channelAvatar,
+                AgeRestricted = ageRestricted,
+                E2ee = e2ee
+            };
+            await Clan.ApiClient.UpdateChannelAsync(Clan.SessionToken, req);
+        }
+
+        public async Task UpdatePrivateAsync(
+            int channelPrivate,
+            List<long>? userIds = null,
+            List<long>? roleIds = null)
+        {
+            if (!Id.HasValue || Clan?.ApiClient == null) return;
+
+            var req = new ApiChangeChannelPrivateRequest
+            {
+                ClanId = Clan.Id,
+                ChannelId = Id.Value,
+                ChannelPrivate = channelPrivate,
+                UserIds = userIds,
+                RoleIds = roleIds
+            };
+            await Clan.ApiClient.UpdateChannelPrivateAsync(Clan.SessionToken, req);
+        }
+
+        public async Task DeleteAsync()
+        {
+            if (Id.HasValue && Clan?.ApiClient != null)
+            {
+                await Clan.ApiClient.DeleteChannelAsync(Clan.SessionToken, Clan.Id, Id.Value);
+            }
+        }
+
         public override string ToString()
         {
             return $"<TextChannel id={Id} name={Name} type={ChannelType}>";

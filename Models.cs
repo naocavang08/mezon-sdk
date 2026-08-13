@@ -334,6 +334,69 @@ namespace Mezon_sdk.Models
 
     }
 
+    // ===== From: ApiDeleteChannelDescRequest.cs =====
+
+    public class ApiDeleteChannelDescRequest : MezonBaseModel<ApiDeleteChannelDescRequest>
+    {
+        [JsonPropertyName("clan_id")]
+        public long? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public long? ChannelId { get; set; }
+    }
+
+    // ===== From: ApiUpdateChannelDescRequest.cs =====
+
+    public class ApiUpdateChannelDescRequest : MezonBaseModel<ApiUpdateChannelDescRequest>
+    {
+        [JsonPropertyName("clan_id")]
+        public long? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public long? ChannelId { get; set; }
+
+        [JsonPropertyName("channel_label")]
+        public string? ChannelLabel { get; set; }
+
+        [JsonPropertyName("category_id")]
+        public long? CategoryId { get; set; }
+
+        [JsonPropertyName("app_id")]
+        public long? AppId { get; set; }
+
+        [JsonPropertyName("topic")]
+        public string? Topic { get; set; }
+
+        [JsonPropertyName("age_restricted")]
+        public int? AgeRestricted { get; set; }
+
+        [JsonPropertyName("e2ee")]
+        public int? E2ee { get; set; }
+
+        [JsonPropertyName("channel_avatar")]
+        public string? ChannelAvatar { get; set; }
+    }
+
+    // ===== From: ApiChangeChannelPrivateRequest.cs =====
+
+    public class ApiChangeChannelPrivateRequest : MezonBaseModel<ApiChangeChannelPrivateRequest>
+    {
+        [JsonPropertyName("clan_id")]
+        public long? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public long? ChannelId { get; set; }
+
+        [JsonPropertyName("channel_private")]
+        public int? ChannelPrivate { get; set; }
+
+        [JsonPropertyName("user_ids")]
+        public List<long>? UserIds { get; set; }
+
+        [JsonPropertyName("role_ids")]
+        public List<long>? RoleIds { get; set; }
+    }
+
     // ===== From: ApiMessageAttachment.cs =====
 
     public class ApiMessageAttachment : MezonBaseModel<ApiMessageAttachment>

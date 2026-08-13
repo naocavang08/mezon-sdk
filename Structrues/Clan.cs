@@ -209,6 +209,29 @@ namespace Mezon_sdk.Structures
             );
         }
 
+        public async Task<ApiChannelDescription> CreateChannelAsync(ApiCreateChannelDescRequest request)
+        {
+            request.ClanId = checked((int)Id);
+            return await ApiClient.CreateChannelAsync(SessionToken, request);
+        }
+
+        public async Task UpdateChannelAsync(ApiUpdateChannelDescRequest request)
+        {
+            request.ClanId = Id;
+            await ApiClient.UpdateChannelAsync(SessionToken, request);
+        }
+
+        public async Task UpdateChannelPrivateAsync(ApiChangeChannelPrivateRequest request)
+        {
+            request.ClanId = Id;
+            await ApiClient.UpdateChannelPrivateAsync(SessionToken, request);
+        }
+
+        public async Task DeleteChannelAsync(long channelId)
+        {
+            await ApiClient.DeleteChannelAsync(SessionToken, Id, channelId);
+        }
+
         public override string ToString()
         {
             return $"<Clan id={Id} name={Name}>";

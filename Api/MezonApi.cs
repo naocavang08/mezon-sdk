@@ -1,4 +1,4 @@
-﻿using Google.Protobuf;
+using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Mezon.Net.Internal.Api;
 using Mezon_sdk.Constants;
@@ -230,6 +230,100 @@ public class MezonApi
             token);
 
         return ApiChannelDescription.FromProtobuf(ParseProto<ChannelDescription>(data))!;
+    }
+
+    // ========================
+    // DELETE CHANNEL
+    // ========================
+    public async Task DeleteChannelAsync(
+        string token,
+        long clanId,
+        long channelId)
+    {
+        var req = new DeleteChannelDescRequest
+        {
+            ClanId = clanId,
+            ChannelId = channelId
+        };
+
+        await CallApiAsync(
+            HttpMethod.Post,
+            "/mezon.api.Mezon/DeleteChannelDesc",
+            req.ToByteArray(),
+            token);
+    }
+
+    public async Task DeleteChannelAsync(
+        string token,
+        ApiDeleteChannelDescRequest request)
+    {
+        await DeleteChannelAsync(token, request.ClanId ?? 0, request.ChannelId ?? 0);
+    }
+
+    // ========================
+    // UPDATE CHANNEL
+    // ========================
+    public async Task UpdateChannelAsync(
+        string token,
+        ApiUpdateChannelDescRequest request)
+    {
+        var proto = new UpdateChannelDescRequest
+        {
+            ClanId = request.ClanId ?? 0,
+            ChannelId = request.ChannelId ?? 0,
+            CategoryId = request.CategoryId ?? 0,
+            AppId = request.AppId ?? 0,
+            Topic = request.Topic ?? "",
+            AgeRestricted = request.AgeRestricted ?? 0,
+            E2Ee = request.E2ee ?? 0
+        };
+
+        if (request.ChannelLabel != null)
+        {
+            proto.ChannelLabel = request.ChannelLabel;
+        }
+
+        if (request.ChannelAvatar != null)
+        {
+            proto.ChannelAvatar = request.ChannelAvatar;
+        }
+
+        await CallApiAsync(
+            HttpMethod.Post,
+            "/mezon.api.Mezon/UpdateChannelDesc",
+            proto.ToByteArray(),
+            token);
+    }
+
+    // ========================
+    // UPDATE CHANNEL PRIVATE
+    // ========================
+    public async Task UpdateChannelPrivateAsync(
+        string token,
+        ApiChangeChannelPrivateRequest request)
+    {
+        var proto = new ChangeChannelPrivateRequest
+        {
+            ClanId = request.ClanId ?? 0,
+            ChannelId = request.ChannelId ?? 0,
+            ChannelPrivate = request.ChannelPrivate ?? 0
+        };
+
+        if (request.UserIds != null)
+        {
+            proto.UserIds.AddRange(request.UserIds);
+        }
+
+        if (request.RoleIds != null)
+        {
+            proto.RoleIds.AddRange(request.RoleIds);
+        }
+
+        await CallApiAsync(
+            HttpMethod.Post,
+            "/mezon.api.Mezon/UpdateChannelPrivate",
+            proto.ToByteArray(),
+            token);
     }
 
     // ========================
