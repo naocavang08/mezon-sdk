@@ -93,6 +93,28 @@ namespace Mezon_sdk.Structures
             return null!;
         }
 
+        public void UpdateFromDesc(string? clanName, long? welcomeChannelId, string sessionToken)
+        {
+            if (!string.IsNullOrEmpty(clanName))
+            {
+                Name = clanName;
+            }
+            if (welcomeChannelId.HasValue)
+            {
+                WelcomeChannelId = welcomeChannelId.Value;
+            }
+            if (!string.IsNullOrEmpty(sessionToken))
+            {
+                SessionToken = sessionToken;
+            }
+        }
+
+        public async Task ReloadChannelsAsync()
+        {
+            _channelsLoaded = false;
+            await LoadChannelsAsync();
+        }
+
         public async Task LoadChannelsAsync()
         {
             if (_channelsLoaded) return;

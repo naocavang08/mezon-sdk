@@ -4,6 +4,7 @@ using Mezon_sdk.Models;
 using Mezon_sdk.Managers;
 using Mezon_sdk.Messages;
 using Mezon_sdk.Utils;
+using Mezon_sdk.Constants;
 
 namespace Mezon_sdk.Structures
 {
@@ -168,6 +169,132 @@ namespace Mezon_sdk.Structures
                 code: messageCode,
                 topicId: topicId
             );
+        }
+
+        public void UpdateFromDesc(ApiChannelDescription initChannelData)
+        {
+            Name = initChannelData.ChannelLabel?.ToString();
+            if (int.TryParse(initChannelData.Type?.ToString(), out var type)) ChannelType = type;
+            var isPrivStr = initChannelData.ChannelPrivate?.ToString()?.ToLower();
+            IsPrivate = isPrivStr == "1" || isPrivStr == "true";
+            if (long.TryParse(initChannelData.CategoryId?.ToString(), out var catId)) CategoryId = catId;
+            CategoryName = initChannelData.CategoryName?.ToString() ?? "";
+            if (long.TryParse(initChannelData.ParentId?.ToString(), out var pId)) ParentId = pId;
+            MeetingCode = initChannelData.MeetingCode?.ToString() ?? "";
+        }
+
+        public Message CreateMessageFromAck(
+            ChannelMessageAck ack,
+            ChannelMessageContent content,
+            List<ApiMessageMention>? mentions = null,
+            List<ApiMessageAttachment>? attachments = null,
+            List<ApiMessageRef>? references = null,
+            long? topicId = null)
+        {
+            int senderId = 0;
+            if (Clan?.Client != null)
+            {
+                var clientIdStr = Clan.Client.GetType().GetProperty("ClientId")?.GetValue(Clan.Client)?.ToString();
+                int parsedSender = 0;
+                if (!string.IsNullOrEmpty(clientIdStr) && int.TryParse(clientIdStr, out parsedSender))
+                {
+                    senderId = parsedSender;
+                }
+            }
+
+            Dictionary<string, object>? contentDict = null;
+            if (content != null)
+            {
+                var json = JsonSerializer.Serialize(content);
+                contentDict = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+            }
+
+            var messageRaw = new ChannelMessage
+            {
+                MessageId = ack.MessageId ?? 0,
+                SenderId = senderId,
+                Content = contentDict,
+                Mentions = mentions,
+                Attachments = attachments,
+                References = references,
+                TopicId = (int?)(topicId)
+            };
+
+            var message = new Message(messageRaw, this, SocketManager);
+            if (message.Id.HasValue)
+            {
+                Messages.Set(message.Id.Value, message);
+            }
+            return message;
+        }
+
+        public async Task<object> UpdateEphemeralAsync(
+            List<long> receiverIds,
+            object content,
+            long messageId,
+            long? referenceMessageId = null,
+            List<ApiMessageMention>? mentions = null,
+            List<ApiMessageAttachment>? attachments = null,
+            bool? mentionEveryone = null,
+            bool? anonymousMessage = null,
+            long? topicId = null)
+        {
+            return await SendEphemeralAsync(
+                receiverIds: receiverIds,
+                content: content,
+                referenceMessageId: referenceMessageId,
+                mentions: mentions,
+                attachments: attachments,
+                mentionEveryone: mentionEveryone,
+                anonymousMessage: anonymousMessage,
+                topicId: topicId,
+                code: (int)TypeMessage.UpdateEphemeralMsg);
+        }
+
+        public async Task<object> DeleteEphemeralAsync(
+            List<long> receiverIds,
+            long messageId,
+            long? topicId = null)
+        {
+            var content = new { t = "deleteEphemeral" };
+            return await SocketManager.WriteEphemeralMessageAsync(
+                receiverIds: receiverIds,
+                clanId: Clan!.Id,
+                channelId: Id ?? 0,
+                mode: Helper.ConvertChannelTypeToChannelMode(ChannelType),
+                isPublic: !IsPrivate,
+                content: content,
+                code: (int)TypeMessage.DeleteEphemeralMsg,
+                topicId: topicId
+            );
+        }
+
+        public async Task<byte[]> PlayMediaAsync(
+            string url,
+            string participantIdentity,
+            string participantName,
+            string name)
+        {
+            if (string.IsNullOrEmpty(MeetingCode))
+            {
+                throw new InvalidOperationException("Channel is not a voice channel.");
+            }
+            if (Clan?.ApiClient == null)
+            {
+                throw new InvalidOperationException("ApiClient is not available.");
+            }
+
+            var sessionToken = Clan.SessionToken;
+            var payload = new
+            {
+                room_name = MeetingCode,
+                participant_identity = participantIdentity,
+                participant_name = participantName,
+                url = url,
+                name = name
+            };
+
+            return await Clan.ApiClient.PlayMediaAsync(sessionToken, payload);
         }
 
         public override string ToString()

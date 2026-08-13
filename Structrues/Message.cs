@@ -113,12 +113,12 @@ namespace Mezon_sdk.Structures
             );
         }
 
-        public async Task<ChannelMessageAck> UpdateAsync(
+        public async Task<Message> UpdateAsync(
             ChannelMessageContent content,
             List<ApiMessageMention>? mentions = null,
             List<ApiMessageAttachment>? attachments = null)
         {
-            return await SocketManager.UpdateChatMessageAsync(
+            var ack = await SocketManager.UpdateChatMessageAsync(
                 clanId: Channel?.Clan?.Id ?? 0,
                 channelId: Channel?.Id ?? 0,
                 mode: Helper.ConvertChannelTypeToChannelMode(Channel?.ChannelType),
@@ -130,6 +130,19 @@ namespace Mezon_sdk.Structures
                 topicId: TopicId,
                 isUpdateMsgTopic: TopicId.HasValue
             );
+
+            if (ack != null && int.TryParse(ack.CreateTime?.ToString(), out var ct))
+            {
+                CreateTimeSeconds = ct;
+            }
+            Content = content;
+            if (mentions != null) Mentions = mentions;
+            if (attachments != null) Attachments = attachments;
+            if (Channel != null && Id.HasValue)
+            {
+                Channel.Messages.Set(Id.Value, this);
+            }
+            return this;
         }
 
         public async Task<ApiMessageReaction> ReactAsync(
