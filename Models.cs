@@ -779,6 +779,12 @@ namespace Mezon_sdk.Models
         [JsonPropertyName("ws_url")]
         public string? WsUrl { get; set; }
 
+        [JsonPropertyName("session_id")]
+        public string? SessionId { get; set; }
+
+        [JsonPropertyName("tcp_url")]
+        public string? TcpUrl { get; set; }
+
     }
 
     // ===== From: ApiVoiceChannelUser.cs =====
@@ -1583,6 +1589,39 @@ namespace Mezon_sdk.Models
         [JsonPropertyName("clan_logo")]
         public string? ClanLogo { get; set; }
 
+        [JsonPropertyName("logo")]
+        public string? Logo { get; set; }
+
+        [JsonPropertyName("banner")]
+        public string? Banner { get; set; }
+
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+
+        [JsonPropertyName("is_onboarding")]
+        public bool? IsOnboarding { get; set; }
+
+        [JsonPropertyName("welcome_channel_id")]
+        public string? WelcomeChannelId { get; set; }
+
+        [JsonPropertyName("onboarding_banner")]
+        public string? OnboardingBanner { get; set; }
+
+        [JsonPropertyName("community_banner")]
+        public string? CommunityBanner { get; set; }
+
+        [JsonPropertyName("is_community")]
+        public bool? IsCommunity { get; set; }
+
+        [JsonPropertyName("about")]
+        public string? About { get; set; }
+
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+
+        [JsonPropertyName("prevent_anonymous")]
+        public bool? PreventAnonymous { get; set; }
+
     }
 
     // ===== From: CustomStatusEvent.cs =====
@@ -1600,6 +1639,12 @@ namespace Mezon_sdk.Models
 
         [JsonPropertyName("status")]
         public string? Status { get; set; }
+
+        [JsonPropertyName("time_reset")]
+        public int? TimeReset { get; set; }
+
+        [JsonPropertyName("no_clear")]
+        public bool? NoClear { get; set; }
 
     }
 
@@ -1938,6 +1983,9 @@ namespace Mezon_sdk.Models
 
     public class LastPinMessageEvent
     {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
         [JsonPropertyName("channel_id")]
         public int ChannelId { get; set; }
 
@@ -1959,12 +2007,36 @@ namespace Mezon_sdk.Models
         [JsonPropertyName("is_public")]
         public bool IsPublic { get; set; }
 
+        [JsonPropertyName("timestamp_seconds")]
+        public int? TimestampSeconds { get; set; }
+
+        [JsonPropertyName("message_sender_avatar")]
+        public string? MessageSenderAvatar { get; set; }
+
+        [JsonPropertyName("message_sender_id")]
+        public string? MessageSenderId { get; set; }
+
+        [JsonPropertyName("message_sender_username")]
+        public string? MessageSenderUsername { get; set; }
+
+        [JsonPropertyName("message_content")]
+        public string? MessageContent { get; set; }
+
+        [JsonPropertyName("message_attachment")]
+        public string? MessageAttachment { get; set; }
+
+        [JsonPropertyName("message_created_time")]
+        public string? MessageCreatedTime { get; set; }
+
     }
 
     // ===== From: LastSeenMessageEvent.cs =====
 
     public class LastSeenMessageEvent
     {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
         [JsonPropertyName("channel_id")]
         public int ChannelId { get; set; }
 
@@ -1979,6 +2051,9 @@ namespace Mezon_sdk.Models
 
         [JsonPropertyName("timestamp_seconds")]
         public string? TimestampSeconds { get; set; }
+
+        [JsonPropertyName("badge_count")]
+        public int? BadgeCount { get; set; }
 
     }
 
@@ -2114,6 +2189,9 @@ namespace Mezon_sdk.Models
 
         [JsonPropertyName("channel_label")]
         public string? ChannelLabel { get; set; }
+
+        [JsonPropertyName("topic_id")]
+        public string? TopicId { get; set; }
 
     }
 
@@ -2629,6 +2707,9 @@ namespace Mezon_sdk.Models
         [JsonPropertyName("clan_id")]
         public int ClanId { get; set; }
 
+        [JsonPropertyName("badge_counts")]
+        public List<int>? BadgeCounts { get; set; }
+
     }
 
     // ===== From: UserClanRemovedEvent.cs =====
@@ -2767,6 +2848,9 @@ namespace Mezon_sdk.Models
         [JsonPropertyName("clan_id")]
         public int ClanId { get; set; }
 
+        [JsonPropertyName("encrypt_private_key")]
+        public string? EncryptPrivateKey { get; set; }
+
     }
 
     // ===== From: VoiceEndedEvent.cs =====
@@ -2845,6 +2929,1173 @@ namespace Mezon_sdk.Models
         [JsonPropertyName("voice_channel_id")]
         public int VoiceChannelId { get; set; }
 
+    }
+
+
+    // ===== From: ScreenShareEvent.cs =====
+
+    public class ScreenShareEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("voice_channel_id")]
+        public string? VoiceChannelId { get; set; }
+
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("is_sharing")]
+        public bool? IsSharing { get; set; }
+    }
+
+    // ===== From: TopicInMessageEvent.cs =====
+
+    public class TopicInMessageEvent
+    {
+        [JsonPropertyName("message_id")]
+        public string? MessageId { get; set; }
+
+        [JsonPropertyName("rpl")]
+        public int? Rpl { get; set; }
+
+        [JsonPropertyName("lsnt")]
+        public string? Lsnt { get; set; }
+
+        [JsonPropertyName("tp_id")]
+        public string? TpId { get; set; }
+    }
+
+    // ===== From: ApiRequestEvent.cs =====
+
+    public class ApiRequestEvent
+    {
+        [JsonPropertyName("api_index")]
+        public int? ApiIndex { get; set; }
+
+        [JsonPropertyName("api_name")]
+        public string? ApiName { get; set; }
+
+        [JsonPropertyName("body")]
+        public byte[]? Body { get; set; }
+    }
+
+    // ===== From: FollowEvent.cs =====
+
+    public class FollowEvent
+    {
+    }
+
+    // ===== From: BannedUserEvent.cs =====
+
+    public class BannedUserEvent
+    {
+        [JsonPropertyName("user_ids")]
+        public List<string>? UserIds { get; set; }
+
+        [JsonPropertyName("action")]
+        public int? Action { get; set; }
+
+        [JsonPropertyName("banner_id")]
+        public string? BannerId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("ban_time")]
+        public int? BanTime { get; set; }
+    }
+
+    // ===== From: ListChannelUsersBannedEvent.cs =====
+
+    public class ListChannelUsersBannedEvent
+    {
+        [JsonPropertyName("banned_user_ids")]
+        public List<string>? BannedUserIds { get; set; }
+    }
+
+    // ===== From: ChannelCanvas.cs =====
+
+    public class ChannelCanvas
+    {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
+        [JsonPropertyName("title")]
+        public string? Title { get; set; }
+
+        [JsonPropertyName("content")]
+        public string? Content { get; set; }
+
+        [JsonPropertyName("creator_id")]
+        public string? CreatorId { get; set; }
+
+        [JsonPropertyName("editor_id")]
+        public string? EditorId { get; set; }
+
+        [JsonPropertyName("is_default")]
+        public bool? IsDefault { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+    }
+
+    // ===== From: IncomingCallPush.cs =====
+
+    public class IncomingCallPush
+    {
+        [JsonPropertyName("receiver_id")]
+        public string? ReceiverId { get; set; }
+
+        [JsonPropertyName("json_data")]
+        public string? JsonData { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("caller_id")]
+        public string? CallerId { get; set; }
+    }
+
+    // ===== From: WebrtcSignalingFwd.cs =====
+
+    public class WebrtcSignalingFwd
+    {
+        [JsonPropertyName("receiver_id")]
+        public string? ReceiverId { get; set; }
+
+        [JsonPropertyName("data_type")]
+        public int? DataType { get; set; }
+
+        [JsonPropertyName("json_data")]
+        public string? JsonData { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("caller_id")]
+        public string? CallerId { get; set; }
+    }
+
+    // ===== From: SFUSignalingFwd.cs =====
+
+    public class SFUSignalingFwd
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("data_type")]
+        public int? DataType { get; set; }
+
+        [JsonPropertyName("json_data")]
+        public string? JsonData { get; set; }
+
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+    }
+
+    // ===== From: AddClanUserEvent.cs =====
+
+    public class AddClanUserEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("user")]
+        public UserProfileRedis? User { get; set; }
+
+        [JsonPropertyName("invitor")]
+        public string? Invitor { get; set; }
+    }
+
+    // ===== From: RoleAssignedEvent.cs =====
+
+    public class RoleAssignedEvent
+    {
+        [JsonPropertyName("ClanId")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("role_id")]
+        public string? RoleId { get; set; }
+
+        [JsonPropertyName("user_ids_assigned")]
+        public List<string>? UserIdsAssigned { get; set; }
+
+        [JsonPropertyName("user_ids_removed")]
+        public List<string>? UserIdsRemoved { get; set; }
+    }
+
+    // ===== From: PermissionRoleChannel.cs =====
+
+    public class PermissionRoleChannel
+    {
+        [JsonPropertyName("permission_id")]
+        public string? PermissionId { get; set; }
+
+        [JsonPropertyName("active")]
+        public bool? Active { get; set; }
+    }
+
+    // ===== From: HashtagDm.cs =====
+
+    public class HashtagDm
+    {
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("channel_label")]
+        public string? ChannelLabel { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("clan_name")]
+        public string? ClanName { get; set; }
+
+        [JsonPropertyName("meeting_code")]
+        public string? MeetingCode { get; set; }
+
+        [JsonPropertyName("type")]
+        public int? Type { get; set; }
+
+        [JsonPropertyName("channel_private")]
+        public int? ChannelPrivate { get; set; }
+
+        [JsonPropertyName("parent_id")]
+        public string? ParentId { get; set; }
+    }
+
+    // ===== From: ClanEmoji.cs =====
+
+    public class ClanEmoji
+    {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
+        [JsonPropertyName("src")]
+        public string? Src { get; set; }
+
+        [JsonPropertyName("shortname")]
+        public string? Shortname { get; set; }
+
+        [JsonPropertyName("category")]
+        public string? Category { get; set; }
+
+        [JsonPropertyName("creator_id")]
+        public string? CreatorId { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("logo")]
+        public string? Logo { get; set; }
+
+        [JsonPropertyName("clan_name")]
+        public string? ClanName { get; set; }
+    }
+
+    // ===== From: ChannelPresenceEvent.cs =====
+
+    public class ChannelPresenceEvent
+    {
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("joins")]
+        public List<UserPresence>? Joins { get; set; }
+
+        [JsonPropertyName("leaves")]
+        public List<UserPresence>? Leaves { get; set; }
+
+        [JsonPropertyName("clan_logo")]
+        public string? ClanLogo { get; set; }
+
+        [JsonPropertyName("category_name")]
+        public string? CategoryName { get; set; }
+
+        [JsonPropertyName("mode")]
+        public int? Mode { get; set; }
+    }
+
+    // ===== From: UserPresence.cs =====
+
+    public class UserPresence
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("session_id")]
+        public int? SessionId { get; set; }
+
+        [JsonPropertyName("username")]
+        public string? Username { get; set; }
+
+        [JsonPropertyName("status")]
+        public string? Status { get; set; }
+
+        [JsonPropertyName("is_mobile")]
+        public bool? IsMobile { get; set; }
+
+        [JsonPropertyName("user_status")]
+        public string? UserStatus { get; set; }
+    }
+
+    // ===== From: Status.cs =====
+
+    public class Status
+    {
+        [JsonPropertyName("presences")]
+        public List<UserPresence>? Presences { get; set; }
+    }
+
+    // ===== From: StatusFollow.cs =====
+
+    public class StatusFollow
+    {
+        [JsonPropertyName("user_ids")]
+        public List<string>? UserIds { get; set; }
+
+        [JsonPropertyName("usernames")]
+        public List<string>? Usernames { get; set; }
+    }
+
+    // ===== From: StatusPresenceEvent.cs =====
+
+    public class StatusPresenceEvent
+    {
+        [JsonPropertyName("joins")]
+        public List<UserPresence>? Joins { get; set; }
+
+        [JsonPropertyName("leaves")]
+        public List<UserPresence>? Leaves { get; set; }
+    }
+
+    // ===== From: StatusUnfollow.cs =====
+
+    public class StatusUnfollow
+    {
+        [JsonPropertyName("user_ids")]
+        public List<string>? UserIds { get; set; }
+    }
+
+    // ===== From: StatusUpdate.cs =====
+
+    public class StatusUpdate
+    {
+        [JsonPropertyName("status")]
+        public string? Status { get; set; }
+    }
+
+    // ===== From: Stream.cs =====
+
+    public class Stream
+    {
+        [JsonPropertyName("mode")]
+        public int? Mode { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("label")]
+        public string? Label { get; set; }
+    }
+
+    // ===== From: StreamData.cs =====
+
+    public class StreamData
+    {
+        [JsonPropertyName("stream")]
+        public Stream? StreamInfo { get; set; }
+
+        [JsonPropertyName("sender")]
+        public UserPresence? Sender { get; set; }
+
+        [JsonPropertyName("data")]
+        public string? Data { get; set; }
+
+        [JsonPropertyName("reliable")]
+        public bool? Reliable { get; set; }
+    }
+
+    // ===== From: StreamPresenceEvent.cs =====
+
+    public class StreamPresenceEvent
+    {
+        [JsonPropertyName("stream")]
+        public Stream? StreamInfo { get; set; }
+
+        [JsonPropertyName("joins")]
+        public List<UserPresence>? Joins { get; set; }
+
+        [JsonPropertyName("leaves")]
+        public List<UserPresence>? Leaves { get; set; }
+    }
+
+    // ===== From: AddFriend.cs =====
+
+    public class AddFriend
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("username")]
+        public string? Username { get; set; }
+
+        [JsonPropertyName("display_name")]
+        public string? DisplayName { get; set; }
+
+        [JsonPropertyName("avatar")]
+        public string? Avatar { get; set; }
+    }
+
+    // ===== From: RemoveFriend.cs =====
+
+    public class RemoveFriend
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+    }
+
+    // ===== From: BlockFriend.cs =====
+
+    public class BlockFriend
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+    }
+
+    // ===== From: UnblockFriend.cs =====
+
+    public class UnblockFriend
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("username")]
+        public string? Username { get; set; }
+
+        [JsonPropertyName("avatar")]
+        public string? Avatar { get; set; }
+
+        [JsonPropertyName("display_name")]
+        public string? DisplayName { get; set; }
+
+        [JsonPropertyName("status")]
+        public string? Status { get; set; }
+
+        [JsonPropertyName("user_status")]
+        public string? UserStatus { get; set; }
+    }
+
+    // ===== From: ClanDeletedEvent.cs =====
+
+    public class ClanDeletedEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("deletor")]
+        public string? Deletor { get; set; }
+    }
+
+    // ===== From: ClanCreatedEvent.cs =====
+
+    public class ClanCreatedEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("clan_name")]
+        public string? ClanName { get; set; }
+
+        [JsonPropertyName("logo")]
+        public string? Logo { get; set; }
+
+        [JsonPropertyName("creator_id")]
+        public string? CreatorId { get; set; }
+
+        [JsonPropertyName("welcome_channel_id")]
+        public string? WelcomeChannelId { get; set; }
+    }
+
+    // ===== From: StickerCreateEvent.cs =====
+
+    public class StickerCreateEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("source")]
+        public string? Source { get; set; }
+
+        [JsonPropertyName("shortname")]
+        public string? Shortname { get; set; }
+
+        [JsonPropertyName("category")]
+        public string? Category { get; set; }
+
+        [JsonPropertyName("creator_id")]
+        public string? CreatorId { get; set; }
+
+        [JsonPropertyName("sticker_id")]
+        public string? StickerId { get; set; }
+
+        [JsonPropertyName("logo")]
+        public string? Logo { get; set; }
+
+        [JsonPropertyName("clan_name")]
+        public string? ClanName { get; set; }
+    }
+
+    // ===== From: StickerUpdateEvent.cs =====
+
+    public class StickerUpdateEvent
+    {
+        [JsonPropertyName("shortname")]
+        public string? Shortname { get; set; }
+
+        [JsonPropertyName("sticker_id")]
+        public string? StickerId { get; set; }
+
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+    }
+
+    // ===== From: StickerDeleteEvent.cs =====
+
+    public class StickerDeleteEvent
+    {
+        [JsonPropertyName("sticker_id")]
+        public string? StickerId { get; set; }
+
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+    }
+
+    // ===== From: RoleEvent.cs =====
+
+    public class RoleEvent
+    {
+        [JsonPropertyName("role")]
+        public ApiRole? Role { get; set; }
+
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("user_add_ids")]
+        public List<string>? UserAddIds { get; set; }
+
+        [JsonPropertyName("user_remove_ids")]
+        public List<string>? UserRemoveIds { get; set; }
+
+        [JsonPropertyName("active_permission_ids")]
+        public List<string>? ActivePermissionIds { get; set; }
+
+        [JsonPropertyName("remove_permission_ids")]
+        public List<string>? RemovePermissionIds { get; set; }
+    }
+
+    // ===== From: EventEmoji.cs =====
+
+    public class EventEmoji
+    {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("short_name")]
+        public string? ShortName { get; set; }
+
+        [JsonPropertyName("source")]
+        public string? Source { get; set; }
+
+        [JsonPropertyName("category")]
+        public string? Category { get; set; }
+
+        [JsonPropertyName("action")]
+        public int? Action { get; set; }
+
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("logo")]
+        public string? Logo { get; set; }
+
+        [JsonPropertyName("clan_name")]
+        public string? ClanName { get; set; }
+
+        [JsonPropertyName("is_for_sale")]
+        public bool? IsForSale { get; set; }
+    }
+
+    // ===== From: PermissionSetEvent.cs =====
+
+    public class PermissionSetEvent
+    {
+        [JsonPropertyName("caller")]
+        public string? Caller { get; set; }
+
+        [JsonPropertyName("role_id")]
+        public string? RoleId { get; set; }
+
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("permission_updates")]
+        public List<PermissionRoleChannel>? PermissionUpdates { get; set; }
+    }
+
+    // ===== From: PermissionChangedEvent.cs =====
+
+    public class PermissionChangedEvent
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("add_permissions")]
+        public List<PermissionRoleChannel>? AddPermissions { get; set; }
+
+        [JsonPropertyName("remove_permissions")]
+        public List<PermissionRoleChannel>? RemovePermissions { get; set; }
+
+        [JsonPropertyName("default_permissions")]
+        public List<PermissionRoleChannel>? DefaultPermissions { get; set; }
+    }
+
+    // ===== From: UnmuteEvent.cs =====
+
+    public class UnmuteEvent
+    {
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("category_id")]
+        public string? CategoryId { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+    }
+
+    // ===== From: ListActivity.cs =====
+
+    public class ListActivity
+    {
+        [JsonPropertyName("acts")]
+        public List<Dictionary<string, object>>? Acts { get; set; }
+    }
+
+    // ===== From: SdTopicEvent.cs =====
+
+    public class SdTopicEvent
+    {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("message_id")]
+        public string? MessageId { get; set; }
+
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("last_sent_message")]
+        public ApiChannelMessageHeader? LastSentMessage { get; set; }
+
+        [JsonPropertyName("message")]
+        public ChannelMessage? Message { get; set; }
+    }
+
+    // ===== From: ChannelAppEvent.cs =====
+
+    public class ChannelAppEvent
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("username")]
+        public string? Username { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("action")]
+        public int? Action { get; set; }
+    }
+
+    // ===== From: UserStatusEvent.cs =====
+
+    public class UserStatusEvent
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("custom_status")]
+        public string? CustomStatus { get; set; }
+    }
+
+    // ===== From: JoinChannelAppData.cs =====
+
+    public class JoinChannelAppData
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("username")]
+        public string? Username { get; set; }
+
+        [JsonPropertyName("hash")]
+        public string? Hash { get; set; }
+    }
+
+    // ===== From: UnpinMessageEvent.cs =====
+
+    public class UnpinMessageEvent
+    {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
+        [JsonPropertyName("message_id")]
+        public string? MessageId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+    }
+
+    // ===== From: CategoryEvent.cs =====
+
+    public class CategoryEvent
+    {
+        [JsonPropertyName("creator_id")]
+        public string? CreatorId { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("category_name")]
+        public string? CategoryName { get; set; }
+
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+    }
+
+    // ===== From: HandleParticipantMeetStateEvent.cs =====
+
+    public class HandleParticipantMeetStateEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("display_name")]
+        public string? DisplayName { get; set; }
+
+        [JsonPropertyName("state")]
+        public int? State { get; set; }
+
+        [JsonPropertyName("room_name")]
+        public string? RoomName { get; set; }
+    }
+
+    // ===== From: DeleteAccountEvent.cs =====
+
+    public class DeleteAccountEvent
+    {
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+    }
+
+    // ===== From: ListDataSocket.cs =====
+
+    public class ListDataSocket
+    {
+        [JsonPropertyName("api_name")]
+        public string? ApiName { get; set; }
+
+        [JsonPropertyName("list_channel_badge_count_req")]
+        public Dictionary<string, object>? ListChannelBadgeCountReq { get; set; }
+
+        [JsonPropertyName("channel_badge_count")]
+        public Dictionary<string, object>? ChannelBadgeCount { get; set; }
+
+        [JsonPropertyName("clan_badge_count")]
+        public Dictionary<string, object>? ClanBadgeCount { get; set; }
+
+        [JsonPropertyName("list_loged_device")]
+        public Dictionary<string, object>? ListLogedDevice { get; set; }
+
+        [JsonPropertyName("list_user_online_req")]
+        public Dictionary<string, object>? ListUserOnlineReq { get; set; }
+
+        [JsonPropertyName("user_online_list")]
+        public Dictionary<string, object>? UserOnlineList { get; set; }
+    }
+
+    // ===== From: MeetParticipantEvent.cs =====
+
+    public class MeetParticipantEvent
+    {
+        [JsonPropertyName("username")]
+        public string? Username { get; set; }
+
+        [JsonPropertyName("room_name")]
+        public string? RoomName { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("action")]
+        public int? Action { get; set; }
+    }
+
+    // ===== From: TransferOwnershipEvent.cs =====
+
+    public class TransferOwnershipEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("prev_owner")]
+        public string? PrevOwner { get; set; }
+
+        [JsonPropertyName("curr_owner")]
+        public string? CurrOwner { get; set; }
+    }
+
+    // ===== From: ActiveArchivedThread.cs =====
+
+    public class ActiveArchivedThread
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+    }
+
+    // ===== From: AllowAnonymousEvent.cs =====
+
+    public class AllowAnonymousEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("allow")]
+        public bool? Allow { get; set; }
+    }
+
+    // ===== From: AIAgentEnabledEvent.cs =====
+
+    public class AIAgentEnabledEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("room_name")]
+        public string? RoomName { get; set; }
+
+        [JsonPropertyName("enabled")]
+        public bool? Enabled { get; set; }
+    }
+
+    // ===== From: ChannelArchiveEvent.cs =====
+
+    public class ChannelArchiveEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("category_id")]
+        public string? CategoryId { get; set; }
+
+        [JsonPropertyName("creator_id")]
+        public string? CreatorId { get; set; }
+
+        [JsonPropertyName("parent_id")]
+        public string? ParentId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("channel_label")]
+        public string? ChannelLabel { get; set; }
+
+        [JsonPropertyName("channel_type")]
+        public int? ChannelType { get; set; }
+
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+
+        [JsonPropertyName("meeting_code")]
+        public string? MeetingCode { get; set; }
+
+        [JsonPropertyName("is_error")]
+        public bool? IsError { get; set; }
+
+        [JsonPropertyName("channel_private")]
+        public bool? ChannelPrivate { get; set; }
+
+        [JsonPropertyName("app_id")]
+        public string? AppId { get; set; }
+
+        [JsonPropertyName("e2ee")]
+        public int? E2Ee { get; set; }
+
+        [JsonPropertyName("topic")]
+        public string? Topic { get; set; }
+
+        [JsonPropertyName("age_restricted")]
+        public int? AgeRestricted { get; set; }
+
+        [JsonPropertyName("active")]
+        public int? Active { get; set; }
+
+        [JsonPropertyName("count_mess_unread")]
+        public int? CountMessUnread { get; set; }
+
+        [JsonPropertyName("user_ids")]
+        public List<string>? UserIds { get; set; }
+
+        [JsonPropertyName("role_ids")]
+        public List<string>? RoleIds { get; set; }
+
+        [JsonPropertyName("channel_avatar")]
+        public string? ChannelAvatar { get; set; }
+    }
+
+    // ===== From: VoiceReactionSend.cs =====
+
+    public class VoiceReactionSend
+    {
+        [JsonPropertyName("emojis")]
+        public List<string>? Emojis { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("sender_id")]
+        public string? SenderId { get; set; }
+
+        [JsonPropertyName("media_type")]
+        public int? MediaType { get; set; }
+    }
+
+    // ===== From: MarkAsRead.cs =====
+
+    public class MarkAsRead
+    {
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("category_id")]
+        public string? CategoryId { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+    }
+
+    // ===== From: QuickMenuDataEvent.cs =====
+
+    public class QuickMenuDataEvent
+    {
+        [JsonPropertyName("menu_name")]
+        public string? MenuName { get; set; }
+
+        [JsonPropertyName("sender_id")]
+        public string? SenderId { get; set; }
+
+        [JsonPropertyName("message_sender_id")]
+        public string? MessageSenderId { get; set; }
+    }
+
+    // ===== From: StreamingStartedEvent.cs =====
+
+    public class StreamingStartedEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("streaming_url")]
+        public string? StreamingUrl { get; set; }
+
+        [JsonPropertyName("is_streaming")]
+        public bool? IsStreaming { get; set; }
+    }
+
+    // ===== From: StreamingEndedEvent.cs =====
+
+    public class StreamingEndedEvent
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+    }
+
+    // ===== From: GotifyMessage.cs =====
+
+    public class GotifyMessage
+    {
+        [JsonPropertyName("id")]
+        public int? Id { get; set; }
+
+        [JsonPropertyName("channel_id")]
+        public string? ChannelId { get; set; }
+
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
+
+        [JsonPropertyName("title")]
+        public string? Title { get; set; }
+
+        [JsonPropertyName("image")]
+        public string? Image { get; set; }
+
+        [JsonPropertyName("priority")]
+        public int? Priority { get; set; }
+
+        [JsonPropertyName("users")]
+        public List<string>? Users { get; set; }
+
+        [JsonPropertyName("extras")]
+        public Dictionary<string, string>? Extras { get; set; }
+
+        [JsonPropertyName("app_id")]
+        public int? AppId { get; set; }
+
+        [JsonPropertyName("sender_id")]
+        public string? SenderId { get; set; }
+    }
+
+    // ===== From: FcmDataPayload.cs =====
+
+    public class FcmDataPayload
+    {
+        [JsonPropertyName("command_type")]
+        public int? CommandType { get; set; }
+
+        [JsonPropertyName("receiver_id")]
+        public string? ReceiverId { get; set; }
+
+        [JsonPropertyName("title")]
+        public string? Title { get; set; }
+
+        [JsonPropertyName("body")]
+        public byte[]? Body { get; set; }
+
+        [JsonPropertyName("user_role_ids")]
+        public List<string>? UserRoleIds { get; set; }
+
+        [JsonPropertyName("user_sent_ids")]
+        public List<string>? UserSentIds { get; set; }
+
+        [JsonPropertyName("priority")]
+        public int? Priority { get; set; }
+
+        [JsonPropertyName("is_e2ee")]
+        public bool? IsE2Ee { get; set; }
+
+        [JsonPropertyName("is_dm")]
+        public bool? IsDm { get; set; }
+
+        [JsonPropertyName("mention_here")]
+        public bool? MentionHere { get; set; }
+    }
+
+    // ===== From: ConfirmLinkMezonOTPData.cs =====
+
+    public class ConfirmLinkMezonOTPData
+    {
+        [JsonPropertyName("type")]
+        public int? Type { get; set; }
+
+        [JsonPropertyName("value")]
+        public string? Value { get; set; }
+    }
+
+    // ===== From: UserChannelAdded.cs =====
+
+    public class UserChannelAdded
+    {
+        [JsonPropertyName("channel_desc")]
+        public ApiChannelDescription? ChannelDesc { get; set; }
+
+        [JsonPropertyName("users")]
+        public List<UserProfileRedis>? Users { get; set; }
+
+        [JsonPropertyName("status")]
+        public string? Status { get; set; }
+
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("caller")]
+        public UserProfileRedis? Caller { get; set; }
+
+        [JsonPropertyName("create_time_seconds")]
+        public int? CreateTimeSeconds { get; set; }
+
+        [JsonPropertyName("active")]
+        public int? Active { get; set; }
+    }
+
+    // ===== From: UserClanRemoved.cs =====
+
+    public class UserClanRemoved
+    {
+        [JsonPropertyName("clan_id")]
+        public string? ClanId { get; set; }
+
+        [JsonPropertyName("user_ids")]
+        public List<string>? UserIds { get; set; }
     }
 
 }

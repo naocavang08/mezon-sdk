@@ -1,4 +1,4 @@
-﻿// Copyright 2019 The Mezon Authors
+// Copyright 2019 The Mezon Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -3225,6 +3225,7 @@ message SdTopicList {
 message ListSdTopicRequest {
   int64 clan_id = 1;
   int32 limit = 2;
+  int32 page = 3;
 }
 
 message SdTopicDetailRequest {
