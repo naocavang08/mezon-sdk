@@ -11,14 +11,14 @@ namespace Mezon_sdk.Structures
 
     public class Message
     {
-        public int? Id { get; set; }
-        public int? SenderId { get; set; }
+        public long? Id { get; set; }
+        public long? SenderId { get; set; }
         public ChannelMessageContent? Content { get; set; }
         public List<ApiMessageMention>? Mentions { get; set; }
         public List<ApiMessageAttachment>? Attachments { get; set; }
         public List<ApiMessageReaction>? Reactions { get; set; }
         public List<ApiMessageRef>? References { get; set; }
-        public int? TopicId { get; set; }
+        public long? TopicId { get; set; }
         public int? CreateTimeSeconds { get; set; }
 
         [JsonIgnore]

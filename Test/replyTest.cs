@@ -122,8 +122,8 @@ namespace Mezon_sdk.Test
                             {
                                 new ApiMessageRef
                                 {
-                                    MessageRefId = (int)ack.MessageId,
-                                    MessageSenderId = (int)botIdLong,
+                                    MessageRefId = ack.MessageId ?? 0,
+                                    MessageSenderId = botIdLong,
                                     Content = "replytest: control send to public channel"
                                 }
                             });
@@ -167,8 +167,8 @@ namespace Mezon_sdk.Test
                         {
                             new ApiMessageRef
                             {
-                                MessageRefId = (int)sendAck.MessageId,
-                                MessageSenderId = (int)(sessApi.UserId ?? 0),
+                                MessageRefId = sendAck.MessageId ?? 0,
+                                MessageSenderId = sessApi.UserId ?? 0,
                                 Content = "replytest: send over socket into private channel"
                             }
                         });

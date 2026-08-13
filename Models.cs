@@ -513,10 +513,10 @@ namespace Mezon_sdk.Models
         public string? Emoji { get; set; }
 
         [JsonPropertyName("id")]
-        public int? Id { get; set; }
+        public long? Id { get; set; }
 
         [JsonPropertyName("sender_id")]
-        public int? SenderId { get; set; }
+        public long? SenderId { get; set; }
 
         [JsonPropertyName("sender_name")]
         public string? SenderName { get; set; }
@@ -528,7 +528,7 @@ namespace Mezon_sdk.Models
         public int? Count { get; set; }
 
         [JsonPropertyName("channel_id")]
-        public int? ChannelId { get; set; }
+        public long? ChannelId { get; set; }
 
         [JsonPropertyName("mode")]
         public int? Mode { get; set; }
@@ -537,7 +537,7 @@ namespace Mezon_sdk.Models
         public string? ChannelLabel { get; set; }
 
         [JsonPropertyName("message_id")]
-        public int? MessageId { get; set; }
+        public long? MessageId { get; set; }
 
     }
 
@@ -546,16 +546,16 @@ namespace Mezon_sdk.Models
     public class ApiMessageRef : MezonBaseModel<ApiMessageRef>
     {
         [JsonPropertyName("message_id")]
-        public int? MessageId { get; set; }
+        public long? MessageId { get; set; }
 
         [JsonPropertyName("message_ref_id")]
-        public int MessageRefId { get; set; }
+        public long MessageRefId { get; set; }
 
         [JsonPropertyName("ref_type")]
         public int? RefType { get; set; }
 
         [JsonPropertyName("message_sender_id")]
-        public int MessageSenderId { get; set; }
+        public long MessageSenderId { get; set; }
 
         [JsonPropertyName("message_sender_username")]
         public string? MessageSenderUsername { get; set; }
@@ -1015,18 +1015,18 @@ namespace Mezon_sdk.Models
     public class ChannelMessage
     {
         [JsonIgnore]
-        public int Id => MessageId;
+        public long Id => MessageId;
         [JsonPropertyName("message_id")]
-        public int MessageId { get; set; }
+        public long MessageId { get; set; }
 
         [JsonPropertyName("clan_id")]
-        public int ClanId { get; set; }
+        public long ClanId { get; set; }
 
         [JsonPropertyName("channel_id")]
-        public int ChannelId { get; set; }
+        public long ChannelId { get; set; }
 
         [JsonPropertyName("sender_id")]
-        public int SenderId { get; set; }
+        public long SenderId { get; set; }
 
         [JsonPropertyName("content")]
         public Dictionary<string, object>? Content { get; set; }
@@ -1095,10 +1095,10 @@ namespace Mezon_sdk.Models
         {
             return new ChannelMessage
             {
-                MessageId = ToInt(message.MessageId) ?? 0,
-                ClanId = ToInt(message.ClanId) ?? 0,
-                ChannelId = ToInt(message.ChannelId) ?? 0,
-                SenderId = ToInt(message.SenderId) ?? 0,
+                MessageId = ToLong(message.MessageId) ?? 0,
+                ClanId = ToLong(message.ClanId) ?? 0,
+                ChannelId = ToLong(message.ChannelId) ?? 0,
+                SenderId = ToLong(message.SenderId) ?? 0,
 
                 Content = SafeJsonParse<Dictionary<string, object>>(message.Content, new()),
 
@@ -1206,8 +1206,8 @@ namespace Mezon_sdk.Models
                     Action = r.Action,
                     EmojiId = ToInt(r.EmojiId) ?? 0,
                     Emoji = r.Emoji,
-                    Id = ToInt(r.Id) ?? 0,
-                    SenderId = ToInt(r.SenderId) ?? 0,
+                    Id = ToLong(r.Id) ?? 0,
+                    SenderId = ToLong(r.SenderId) ?? 0,
                     SenderName = r.SenderName,
                     SenderAvatar = r.SenderAvatar,
                     Count = r.Count
@@ -1230,10 +1230,10 @@ namespace Mezon_sdk.Models
 
                 return list.Refs.Select(r => new ApiMessageRef
                 {
-                    MessageId = ToInt(r.MessageId) ?? 0,
-                    MessageRefId = ToInt(r.MessageRefId) ?? 0,
+                    MessageId = ToLong(r.MessageId) ?? 0,
+                    MessageRefId = ToLong(r.MessageRefId) ?? 0,
                     RefType = r.RefType,
-                    MessageSenderId = ToInt(r.MessageSenderId) ?? 0,
+                    MessageSenderId = ToLong(r.MessageSenderId) ?? 0,
                     MessageSenderUsername = r.MessageSenderUsername,
                     MessageSenderDisplayName = r.MessageSenderDisplayName,
                     MessageSenderAvatar = r.MessageSenderAvatar,
@@ -1368,13 +1368,13 @@ namespace Mezon_sdk.Models
     public class ChannelMessageAck
     {
         [JsonPropertyName("channel_id")]
-        public int ChannelId { get; set; }
+        public long ChannelId { get; set; }
 
         [JsonPropertyName("mode")]
         public int? Mode { get; set; }
 
         [JsonPropertyName("message_id")]
-        public int? MessageId { get; set; }
+        public long? MessageId { get; set; }
 
         [JsonPropertyName("code")]
         public int? Code { get; set; }
@@ -1392,7 +1392,7 @@ namespace Mezon_sdk.Models
         public bool? Persistence { get; set; }
 
         [JsonPropertyName("clan_id")]
-        public int? ClanId { get; set; }
+        public long? ClanId { get; set; }
 
         [JsonPropertyName("channel_label")]
         public string? ChannelLabel { get; set; }
@@ -1894,22 +1894,22 @@ namespace Mezon_sdk.Models
     public class GiveCoffeeEvent
     {
         [JsonPropertyName("sender_id")]
-        public int SenderId { get; set; }
+        public long SenderId { get; set; }
 
         [JsonPropertyName("receiver_id")]
-        public int ReceiverId { get; set; }
+        public long ReceiverId { get; set; }
 
         [JsonPropertyName("token_count")]
         public int TokenCount { get; set; }
 
         [JsonPropertyName("message_ref_id")]
-        public int MessageRefId { get; set; }
+        public long MessageRefId { get; set; }
 
         [JsonPropertyName("channel_id")]
-        public int ChannelId { get; set; }
+        public long ChannelId { get; set; }
 
         [JsonPropertyName("clan_id")]
-        public int ClanId { get; set; }
+        public long ClanId { get; set; }
 
     }
 
@@ -1918,7 +1918,7 @@ namespace Mezon_sdk.Models
     public class HashtagOnMessage : StartEndIndex
     {
         [JsonPropertyName("channelid")]
-        public int? ChannelId { get; set; }
+        public long? ChannelId { get; set; }
 
     }
 

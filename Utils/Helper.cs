@@ -114,6 +114,30 @@ namespace Mezon_sdk.Utils
                 return null;
             }
         }
+
+        public static long? ToLong(object? value)
+        {
+            if (value == null) return null;
+
+            try
+            {
+                if (value is JsonElement je)
+                {
+                    if (je.ValueKind == JsonValueKind.Number)
+                        return je.GetInt64();
+
+                    if (je.ValueKind == JsonValueKind.String &&
+                        long.TryParse(je.GetString(), out var l))
+                        return l;
+                }
+
+                return Convert.ToInt64(value);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 
     public static class ProtoUtils
